@@ -74,23 +74,58 @@ flowchart TD
   - Request ID injection for end-to-end tracing.
   - Global exception interception returning normalized RFC-7807 compliant error schemas.
 
-### 2.3 Service Layer
+### 2.3 Layered Application Architecture (Module 03)
+
+The backend follows a strict 5-layer separation of concerns:
+
+```
+HTTP Client / Next.js Frontend
+        ↓
+1. API Router Layer (app/api/v1/endpoints/)
+   - Versioned endpoint handlers (/locations, /pollution, /conversations, /messages, /feedback)
+   - Dependency injection (get_db session)
+   - RFC-compliant response wrapping (SuccessResponse[T] / ErrorResponse)
+        ↓
+2. Validation Layer (app/schemas/)
+   - Pydantic v2 schemas with ConfigDict(from_attributes=True)
+   - Strict field validators (coordinates, AQI 0-500, ratings 1-5, particulate ranges)
+        ↓
+3. Service Layer (app/services/)
+   - Domain business logic, deduplication, orchestration, analytical aggregations
+        ↓
+4. Repository Layer (app/repositories/)
+   - Data access abstraction, SQL queries, filtering, sorting, pagination
+        ↓
+5. Data & Persistence Layer (app/models/ + SQLAlchemy 2.0 + PostgreSQL)
+   - 6 relational entities: User, Location, PollutionObservation, Conversation, Message, Feedback
+   - Declarative Base with TimeStampedModel mixins
+   - Connection pooling (QueuePool, pool_pre_ping=True, pool_recycle=1800)
+   - Alembic versioned migrations with reversible up/down paths
+   - Zero-crash local SQLite fallback engine when PostgreSQL 5432 is unavailable
+```
+
+### 2.4 Service Catalog (app/services/)
 - **AI Service (`app.services.ai`)**:
   - Provider abstraction interface (`BaseAIProvider`) enabling zero-downtime model upgrades.
   - Concrete `GeminiService` using Google GenAI SDK.
   - Modular prompt template management with strict environmental safety and scientific grounding rules.
-- **Pollution Data Service (`app.services.pollution_service`)**:
-  - Normalizes multiple regional AQI standards (US AQI, EU CAQI, Indian NAAQS).
-  - Prepares aggregation and anomaly detection pipelines.
-- **User Service (`app.services.user_service`)**:
-  - Manages subscriber preferences, alert thresholds, and exposure profiles.
+- **Pollution Service (`app.services.pollution_service`)**:
+  - Ingestion validation, multi-pollutant metrics persistence, and summary aggregations (avg/min/max AQI, PM2.5, PM10).
+- **Location Service (`app.services.location_service`)**:
+  - Spatial coordinates validation, station deduplication by name/city/country, and CRUD operations.
+- **Conversation Service (`app.services.conversation_service`)**:
+  - Dialogue session management, lifecycle control, and optional user scoping.
+- **Message Service (`app.services.message_service`)**:
+  - Chronological message persistence, role validation (`user`, `assistant`, `system`), and dialogue retrieval.
+- **Feedback Service (`app.services.feedback_service`)**:
+  - Quality ratings (1–5) and user sentiment persistence.
 - **Analytics Service (`app.services.analytics_service`)**:
   - Computes moving averages, historical trends, and exposure hazard indices.
 
-### 2.4 Data Persistence Layer
+### 2.5 Data Persistence Layer
 - **Database Engine**: PostgreSQL with connection pooling via SQLAlchemy 2.0.
 - **Session Management**: Scoped generator dependency (`get_db`) ensuring deterministic connection release.
-- **Schema Evolution**: Alembic migration tracking versioned DDL changes with rollback capabilities.
+- **Schema Evolution**: Alembic migration tracking versioned DDL changes with rollback capabilities (`001_initial_schema.py`).
 
 ---
 

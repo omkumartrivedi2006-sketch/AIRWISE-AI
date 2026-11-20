@@ -1,20 +1,28 @@
 """
 AIRWISE AI — Alembic Environment Configuration
-Loads connection details dynamically from app.core.config.settings
+Loads connection details dynamically from app.core.config.settings and imports all models.
 """
 
 import os
 import sys
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import create_engine, pool
 from alembic import context
 
 # Add backend directory to sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.config import settings
-from app.db.session import Base
-from app.models.base import TimeStampedModel
+from app.models import (
+    Base,
+    Conversation,
+    Feedback,
+    Location,
+    Message,
+    PollutionObservation,
+    TimeStampedModel,
+    User,
+)
 
 # Alembic Config object
 config = context.config
@@ -26,18 +34,31 @@ if config.config_file_name is not None:
 # Model metadata for autogenerate support
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with environment configuration
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+def get_db_url() -> str:
+    """Return database URL from settings, falling back to local SQLite if PostgreSQL is unreachable."""
+    url = settings.DATABASE_URL
+    if "postgresql" in url:
+        try:
+            from sqlalchemy import text
+            test_engine = create_engine(url, pool_pre_ping=True)
+            with test_engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            return url
+        except Exception:
+            return "sqlite:///./airwise_local.db"
+    return url
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode without an active connection."""
-    url = config.get_main_option("sqlalchemy.url")
+    """Run migrations in 'offline' mode."""
+    url = get_db_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
@@ -46,19 +67,14 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode with an active engine connection."""
-    configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = settings.DATABASE_URL
-
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    url = get_db_url()
+    connectable = create_engine(url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
+            render_as_batch=True if "sqlite" in str(url) else False,
         )
 
         with context.begin_transaction():

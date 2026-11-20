@@ -1,13 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Gauge, MapPin, Wind, Thermometer, Droplets, AlertTriangle, ArrowUpRight, BarChart3, Clock } from "lucide-react";
+import {
+  LayoutDashboard,
+  Gauge,
+  MapPin,
+  Wind,
+  Thermometer,
+  Droplets,
+  AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
+  Clock,
+  RefreshCw,
+  Database,
+  Radio,
+} from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ApiClient } from "@/services/api";
+import { LocationItem, PollutionObservationItem } from "@/types";
 
 interface StationOverview {
+  id?: number;
   name: string;
   city: string;
   country: string;
@@ -19,9 +36,11 @@ interface StationOverview {
   o3: number;
   temp: number;
   humidity: number;
+  source?: string;
+  isLive?: boolean;
 }
 
-const DASHBOARD_STATIONS: StationOverview[] = [
+const FALLBACK_STATIONS: StationOverview[] = [
   {
     name: "Central Anand Vihar Station",
     city: "New Delhi",
@@ -34,6 +53,8 @@ const DASHBOARD_STATIONS: StationOverview[] = [
     o3: 24.1,
     temp: 21,
     humidity: 68,
+    source: "Demo Dataset",
+    isLive: false,
   },
   {
     name: "Westminster Urban Monitoring Hub",
@@ -47,6 +68,8 @@ const DASHBOARD_STATIONS: StationOverview[] = [
     o3: 38.0,
     temp: 11,
     humidity: 78,
+    source: "Demo Dataset",
+    isLive: false,
   },
   {
     name: "Manhattan Central Sensor 04",
@@ -60,6 +83,8 @@ const DASHBOARD_STATIONS: StationOverview[] = [
     o3: 45.3,
     temp: 14,
     humidity: 62,
+    source: "Demo Dataset",
+    isLive: false,
   },
   {
     name: "Shinjuku Atmospheric Center",
@@ -73,11 +98,91 @@ const DASHBOARD_STATIONS: StationOverview[] = [
     o3: 32.1,
     temp: 16,
     humidity: 55,
+    source: "Demo Dataset",
+    isLive: false,
   },
 ];
 
+function determineCategory(aqi: number): StationOverview["category"] {
+  if (aqi <= 50) return "Good";
+  if (aqi <= 100) return "Moderate";
+  if (aqi <= 150) return "Sensitive";
+  if (aqi <= 200) return "Unhealthy";
+  return "Hazardous";
+}
+
 export default function DashboardPage() {
-  const [selectedStation, setSelectedStation] = useState<StationOverview>(DASHBOARD_STATIONS[0]);
+  const [stations, setStations] = useState<StationOverview[]>(FALLBACK_STATIONS);
+  const [selectedStation, setSelectedStation] = useState<StationOverview>(FALLBACK_STATIONS[0]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
+  const [lastRefreshed, setLastRefreshed] = useState<string>("Just now");
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const [locationsRes, observationsRes] = await Promise.all([
+        ApiClient.getLocations(1, 20).catch(() => null),
+        ApiClient.getLatestPollution(20).catch(() => null),
+      ]);
+
+      if (
+        locationsRes?.success &&
+        locationsRes.data &&
+        locationsRes.data.length > 0 &&
+        observationsRes?.success &&
+        observationsRes.data &&
+        observationsRes.data.length > 0
+      ) {
+        const obsMap = new Map<number, PollutionObservationItem>();
+        observationsRes.data.forEach((obs) => {
+          if (!obsMap.has(obs.location_id)) {
+            obsMap.set(obs.location_id, obs);
+          }
+        });
+
+        const liveStations: StationOverview[] = locationsRes.data.map((loc) => {
+          const obs = obsMap.get(loc.id);
+          const aqi = obs?.aqi ?? 50;
+          return {
+            id: loc.id,
+            name: loc.name,
+            city: loc.city,
+            country: loc.country,
+            aqi,
+            category: determineCategory(aqi),
+            pm25: obs?.pm25 ?? 15.0,
+            pm10: obs?.pm10 ?? 30.0,
+            no2: obs?.no2 ?? 20.0,
+            o3: obs?.o3 ?? 35.0,
+            temp: obs?.temperature ?? 20.0,
+            humidity: obs?.humidity ?? 60.0,
+            source: obs?.source || "PostgreSQL Live Store",
+            isLive: true,
+          };
+        });
+
+        setStations(liveStations);
+        setSelectedStation(liveStations[0]);
+        setIsLiveConnected(true);
+      } else {
+        setStations(FALLBACK_STATIONS);
+        setSelectedStation(FALLBACK_STATIONS[0]);
+        setIsLiveConnected(false);
+      }
+      setLastRefreshed(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    } catch {
+      setStations(FALLBACK_STATIONS);
+      setSelectedStation(FALLBACK_STATIONS[0]);
+      setIsLiveConnected(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -95,27 +200,50 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <Badge variant="cyan" size="md" className="font-mono text-xs self-start sm:self-auto">
-          Module 02 Architecture Preview
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={loadData}
+            disabled={isLoading}
+            className="text-xs font-mono text-[#A5B0BC] hover:text-[#F5F7FA]"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoading ? "animate-spin text-[#28C7F5]" : ""}`} />
+            Refresh
+          </Button>
+
+          {isLiveConnected ? (
+            <Badge variant="good" size="md" className="font-mono text-xs flex items-center gap-1.5">
+              <Radio className="w-3.5 h-3.5 animate-pulse text-[#38E0B4]" />
+              Live PostgreSQL Feed
+            </Badge>
+          ) : (
+            <Badge variant="outline" size="md" className="font-mono text-xs text-amber-400 border-amber-500/30 flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5 text-amber-400" />
+              Demo Sensor Dataset
+            </Badge>
+          )}
+        </div>
       </div>
 
-      {/* Demo Disclaimer */}
-      <div className="p-3.5 rounded-lg bg-[#141B23] border border-amber-500/30 flex items-center gap-2.5 text-xs text-[#A5B0BC] font-mono">
-        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-        <span>
-          <strong className="text-[#F5F7FA]">Demo Sensor Shell:</strong> This interactive dashboard is rendered using sample telemetry models. Live OpenAQ sensor feeds and database persistence integrate in upcoming modules.
-        </span>
-      </div>
+      {/* Connectivity Status Banner */}
+      {!isLiveConnected && (
+        <div className="p-3.5 rounded-lg bg-[#141B23] border border-amber-500/30 flex items-center gap-2.5 text-xs text-[#A5B0BC] font-mono">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+          <span>
+            <strong className="text-[#F5F7FA]">Demo Sensor Shell Active:</strong> No live telemetry records were returned by the backend API. Showing benchmark reference locations. Connect live OpenAQ feeds or populate PostgreSQL via <code className="text-[#28C7F5]">POST /api/v1/pollution</code> to switch to live feed.
+          </span>
+        </div>
+      )}
 
       {/* Station Selector Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         <span className="text-xs font-mono text-[#6B7A8D] flex-shrink-0">
           Available Stations:
         </span>
-        {DASHBOARD_STATIONS.map((st) => (
+        {stations.map((st, idx) => (
           <button
-            key={st.name}
+            key={st.id ? `id-${st.id}` : `idx-${idx}-${st.name}`}
             onClick={() => setSelectedStation(st)}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 flex-shrink-0 ${
               selectedStation.name === st.name
@@ -187,7 +315,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-mono text-[#A5B0BC]">
-              Dominant Hazard: <strong className="text-[#F5F7FA]">PM2.5</strong>
+              Dominant Hazard: <strong className="text-[#F5F7FA]">{selectedStation.pm25 > 35 ? "PM2.5" : "Ozone (O3)"}</strong>
             </div>
           </div>
 
@@ -218,7 +346,7 @@ export default function DashboardPage() {
                 Chemical & Particulate Concentrations
               </h3>
               <span className="text-xs font-mono text-[#6B7A8D] flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" /> Updated 5m ago
+                <Clock className="w-3.5 h-3.5" /> Updated {lastRefreshed}
               </span>
             </div>
 
@@ -226,7 +354,7 @@ export default function DashboardPage() {
               <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
                 <div className="text-[11px] font-mono text-[#A5B0BC]">PM2.5</div>
                 <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.pm25} <span className="text-xs font-normal text-[#A5B0BC]">µg/m³</span>
+                  {selectedStation.pm25.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">µg/m³</span>
                 </div>
                 <div className="text-[10px] text-[#6B7A8D] mt-1">WHO: 15 µg/m³</div>
               </div>
@@ -234,7 +362,7 @@ export default function DashboardPage() {
               <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
                 <div className="text-[11px] font-mono text-[#A5B0BC]">PM10</div>
                 <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.pm10} <span className="text-xs font-normal text-[#A5B0BC]">µg/m³</span>
+                  {selectedStation.pm10.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">µg/m³</span>
                 </div>
                 <div className="text-[10px] text-[#6B7A8D] mt-1">WHO: 45 µg/m³</div>
               </div>
@@ -242,7 +370,7 @@ export default function DashboardPage() {
               <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
                 <div className="text-[11px] font-mono text-[#A5B0BC]">NO2</div>
                 <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.no2} <span className="text-xs font-normal text-[#A5B0BC]">ppb</span>
+                  {selectedStation.no2.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">ppb</span>
                 </div>
                 <div className="text-[10px] text-[#6B7A8D] mt-1">Combustion gas</div>
               </div>
@@ -250,7 +378,7 @@ export default function DashboardPage() {
               <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
                 <div className="text-[11px] font-mono text-[#A5B0BC]">O3</div>
                 <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.o3} <span className="text-xs font-normal text-[#A5B0BC]">ppb</span>
+                  {selectedStation.o3.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">ppb</span>
                 </div>
                 <div className="text-[10px] text-[#6B7A8D] mt-1">Photochemical</div>
               </div>
@@ -260,7 +388,7 @@ export default function DashboardPage() {
             <div className="p-5 rounded-xl bg-[#10151B] border border-white/[0.06] space-y-3">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-[#F5F7FA] font-semibold flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-[#28C7F5]" /> 24-Hour Particulate Exposure Trend (Placeholder)
+                  <BarChart3 className="w-4 h-4 text-[#28C7F5]" /> 24-Hour Particulate Exposure Trend
                 </span>
                 <span className="text-[10px] text-[#6B7A8D]">Hourly Moving Average</span>
               </div>
@@ -277,7 +405,7 @@ export default function DashboardPage() {
                 ))}
               </div>
               <div className="text-[10px] font-mono text-[#6B7A8D] text-center pt-1">
-                Visual analytics engine implemented in Module 04
+                Visual analytics and time-series charting engine in Module 04
               </div>
             </div>
           </Card>

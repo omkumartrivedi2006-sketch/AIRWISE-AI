@@ -1,8 +1,8 @@
 """
-AIRWISE AI — Centralized Exception Handling & Standard Error Models
+AIRWISE AI — Centralized Exception Handling & Standardized RFC Error Schemas
+Ensures all errors return consistent { success: false, message: '...', error: { code, details } } structures.
 """
 
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
@@ -28,7 +28,7 @@ class AirwiseException(Exception):
 
 
 class DatabaseConnectionException(AirwiseException):
-    """Raised when database is unavailable or connection pool exhausted."""
+    """Raised when database is unavailable."""
     def __init__(self, message: str = "Database service is currently unreachable", details: Optional[Any] = None):
         super().__init__(
             message=message,
@@ -55,21 +55,19 @@ def create_error_response(
     message: str,
     details: Optional[Any] = None,
 ) -> JSONResponse:
-    """Helper to construct standardized RFC-style error payloads."""
+    """Helper to construct standardized error payloads."""
     payload: Dict[str, Any] = {
+        "success": False,
+        "message": message,
         "error": {
             "code": code,
-            "message": message,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
+            "details": details if details is not None else [],
+        },
     }
-    if details is not None:
-        payload["error"]["details"] = details
     return JSONResponse(status_code=status_code, content=payload)
 
 
 async def airwise_exception_handler(request: Request, exc: AirwiseException) -> JSONResponse:
-    """Handles domain-specific AIRWISE exceptions."""
     logger.error("Domain exception [%s]: %s (path: %s)", exc.code, exc.message, request.url.path)
     return create_error_response(
         status_code=exc.status_code,
@@ -80,7 +78,6 @@ async def airwise_exception_handler(request: Request, exc: AirwiseException) -> 
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    """Handles Pydantic request validation failures with field-level breakdowns."""
     errors = exc.errors()
     formatted_errors: List[Dict[str, str]] = []
     for err in errors:
@@ -100,12 +97,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
-    """Handles standard HTTP exceptions (e.g. 404 Not Found, 405 Method Not Allowed)."""
     code_map = {
-        404: "RESOURCE_NOT_FOUND",
-        405: "METHOD_NOT_ALLOWED",
+        400: "BAD_REQUEST",
         401: "UNAUTHORIZED",
         403: "FORBIDDEN",
+        404: "RESOURCE_NOT_FOUND",
+        405: "METHOD_NOT_ALLOWED",
     }
     code = code_map.get(exc.status_code, "HTTP_ERROR")
     return create_error_response(
@@ -116,7 +113,6 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Catches all unexpected runtime exceptions and prevents stack trace leakage."""
     logger.exception("Unhandled server exception processing %s: %s", request.url.path, exc)
     return create_error_response(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

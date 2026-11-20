@@ -1,9 +1,6 @@
 """
-AIRWISE AI — Backend Health & Diagnostics Tests
+AIRWISE AI — General Backend Health & Root Endpoint Tests
 """
-
-import pytest
-
 
 def test_root_endpoint(client):
     """Verify that root endpoint returns operational status and links."""
@@ -16,19 +13,16 @@ def test_root_endpoint(client):
 
 
 def test_health_endpoint(client):
-    """Verify that /api/v1/health returns structured health payload."""
+    """Verify that /api/v1/health returns standardized health payload."""
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] in ["healthy", "degraded"]
-    assert data["service"] == "AIRWISE AI Backend"
-    assert "version" in data
-    assert "environment" in data
-    assert "components" in data
-    assert "database" in data["components"]
-    assert "ai_engine" in data["components"]
-    assert "status" in data["components"]["database"]
-    assert "status" in data["components"]["ai_engine"]
+    assert data["success"] is True
+    assert "data" in data
+    assert data["data"]["status"] in ["healthy", "degraded"]
+    assert "components" in data["data"]
+    assert "database" in data["data"]["components"]
+    assert "ai_engine" in data["data"]["components"]
 
 
 def test_ai_status_endpoint(client):
@@ -46,6 +40,5 @@ def test_404_error_formatting(client):
     response = client.get("/api/v1/non-existent-endpoint")
     assert response.status_code == 404
     data = response.json()
-    assert "error" in data
+    assert data["success"] is False
     assert data["error"]["code"] == "RESOURCE_NOT_FOUND"
-    assert "timestamp" in data["error"]

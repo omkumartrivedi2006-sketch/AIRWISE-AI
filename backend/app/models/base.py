@@ -1,14 +1,14 @@
 """
-AIRWISE AI — Base SQLAlchemy Model
+AIRWISE AI — Base Model & Shared Mixins
 """
 
 from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Integer
-from app.db.session import Base
+from app.core.database import Base
 
 
 class TimeStampedModel(Base):
-    """Abstract base model adding created_at and updated_at timestamps."""
+    """Abstract base model with autoincrement ID and UTC timestamps."""
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

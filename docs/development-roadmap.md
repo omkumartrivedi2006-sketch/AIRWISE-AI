@@ -10,7 +10,7 @@ This roadmap outlines the progressive evolution of AIRWISE AI from project incep
 | :--- | :--- | :--- | :--- |
 | **Module 01** | **Project Foundation, Architecture & Setup** | Monorepo structure, Next.js app shell, FastAPI backend, DB & AI foundations, design system | **Completed** |
 | **Module 02** | **Landing Page UI/UX & Frontend Implementation** | 9 landing sections, design tokens, responsive layout, placeholder routes, demo data labeling | **Completed** |
-| **Module 03** | **Pollution Data Ingestion & Environmental APIs** | Live AQI data pipelines, pollutant telemetry, normalization, caching | Scheduled Next |
+| **Module 03** | **Backend Engineering, REST API & PostgreSQL Integration** | Layered FastAPI backend, 6 ORM models, Alembic migrations, full REST API + frontend integration | **Completed** |
 | **Module 04** | **Core AI Intelligence & Gemini Assistant Engine** | Gemini API integration, context-grounded prompt templates, health advisory agent | Scheduled |
 | **Module 05** | **Interactive Dashboard & Environmental Visualizations** | Geospatial air maps, historical pollutant trends, analytics charts, comparative metrics | Scheduled |
 | **Module 06** | **User Personalization & Real-Time Alert System** | Exposure profiles, asthma/vulnerability presets, notifications, automated action plans | Scheduled |
@@ -49,11 +49,19 @@ This roadmap outlines the progressive evolution of AIRWISE AI from project incep
 
 ---
 
-### Module 03: Pollution Data Ingestion & Environmental APIs
-- **Goal**: Integrate live environmental APIs (OpenAQ, regional meteorological sensors, satellite feeds) to ingest real-time pollutant telemetry.
-- **Deliverables**:
-  - `PollutionDataService` connecting to external APIs with retry logic and backoff.
-  - Ingestion models for PM2.5, PM10, NO2, SO2, CO, O3, Temperature, Humidity, and Wind Vector.
-  - Standardized AQI computation engine mapping raw concentrations to US EPA and international scales.
-  - In-memory/Redis caching layer for high-throughput station lookups.
-  - Endpoints: `GET /api/v1/pollution/current`, `GET /api/v1/pollution/stations`, `GET /api/v1/pollution/forecast`.
+### Module 03: Backend Engineering, REST API & PostgreSQL Integration
+- [x] **Layered Backend Architecture**: API Router → Pydantic v2 Validation → Service Layer → Repository Layer → SQLAlchemy 2.0 ORM → PostgreSQL.
+- [x] **SQLAlchemy ORM Models**: `User`, `Location`, `PollutionObservation`, `Conversation`, `Message`, `Feedback` with relationships and constraints.
+- [x] **Alembic Migrations**: `001_initial_schema.py` covering all 6 tables with upgrade/downgrade support. Verified `alembic upgrade head` and `alembic downgrade base` → `upgrade head` round-trip.
+- [x] **Pydantic v2 Schemas**: Full request/response schema coverage with `model_config = ConfigDict(from_attributes=True)` and standardized `SuccessResponse[T]` / `ErrorResponse` wrappers.
+- [x] **Repository Layer**: CRUD and query methods for Location, PollutionObservation, Conversation, Message, Feedback with pagination support.
+- [x] **Service Layer**: Business logic, duplicate detection, ownership validation, and analytics aggregation.
+- [x] **REST API Endpoints** (`/api/v1`): Health, Locations, Pollution (observations, latest, summary), Conversations, Messages, Feedback — all returning `{success, message, data, meta}` envelope.
+- [x] **Database Resilience**: SQLite fallback when PostgreSQL is unavailable; `DATABASE_URL=postgresql+psycopg://...` for production.
+- [x] **Frontend API Integration**: `ApiClient` service with typed methods for all backend endpoints; `AQIOverviewSection`, Dashboard, Assistant, and Contact pages connected.
+- [x] **Automated Tests**: 16 unit and integration tests passing (`pytest tests -v`).
+- [x] **Documentation**: Architecture, API docs, and roadmap updated.
+
+---
+
+### Module 04: Core AI Intelligence & Gemini Assistant Engine

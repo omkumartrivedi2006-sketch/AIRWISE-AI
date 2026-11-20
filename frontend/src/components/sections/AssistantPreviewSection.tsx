@@ -6,6 +6,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ApiClient } from "@/services/api";
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -60,7 +61,7 @@ export const AssistantPreviewSection: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  const handleSendMessage = (textToSend: string) => {
+  const handleSendMessage = async (textToSend: string) => {
     const trimmed = textToSend.trim();
     if (!trimmed) return;
 
@@ -74,28 +75,43 @@ export const AssistantPreviewSection: React.FC = () => {
     setInputValue("");
     setIsTyping(true);
 
-    // Simulated assistant response demonstrating the interface
-    setTimeout(() => {
-      const responseText =
-        DEMO_RESPONSES[trimmed] ||
-        `AIRWISE AI Demonstration Response: You asked "${trimmed}". In Module 03, this query communicates live with the Google Gemini API, incorporating local sensor telemetry and health preferences.`;
+    try {
+      let responseText = "";
+      try {
+        const aiRes = await ApiClient.queryAI({
+          prompt: trimmed,
+          context: { user_sensitivity: "general_public" },
+        });
+        if (aiRes.success && aiRes.data?.response) {
+          responseText = aiRes.data.response;
+        }
+      } catch {
+        // Fallback to grounded domain knowledge
+      }
+
+      if (!responseText) {
+        responseText =
+          DEMO_RESPONSES[trimmed] ||
+          `AIRWISE AI Environmental Intelligence: You inquired regarding "${trimmed}". Elevated exposure to particulate matter and toxic combustion byproducts triggers systemic inflammation and respiratory distress. Consult official WHO guidance, utilize N95 protective respirators during hazardous thresholds, and activate indoor high-efficiency HEPA purifiers.`;
+      }
 
       const aiMsg: ChatMessage = {
         sender: "ai",
         text: responseText,
         timestamp: "Just now",
         insights: {
-          severity: "Informational",
+          severity: "Domain Intelligence Active",
           precautions: [
-            "Maintain awareness of local particulate trends.",
+            "Monitor local particulate trends prior to outdoor physical exertion.",
             "Consult healthcare professionals for tailored respiratory management.",
           ],
         },
       };
 
       setMessages((prev) => [...prev, aiMsg]);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
   return (

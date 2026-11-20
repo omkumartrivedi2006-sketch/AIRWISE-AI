@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { Gauge, HelpCircle, Wind, Droplets, Thermometer, ShieldAlert, AlertTriangle, ArrowRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Gauge, HelpCircle, Wind, Droplets, Thermometer, ShieldAlert, AlertTriangle, ArrowRight, RefreshCw, Database } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Tooltip } from "@/components/ui/Tooltip";
-import Link from "next/link";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { ApiClient } from "@/services/api";
+import { LocationItem, PollutionObservationItem } from "@/types";
 
 interface MetricInfo {
   id: string;
@@ -83,6 +86,50 @@ const AQI_SCALE_TIERS = [
 
 export const AQIOverviewSection: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState<MetricInfo>(DEMO_METRICS[0]);
+  const [liveObservations, setLiveObservations] = useState<PollutionObservationItem[]>([]);
+  const [locations, setLocations] = useState<LocationItem[]>([]);
+  const [dataSource, setDataSource] = useState<"api" | "demo">("demo");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [apiConnected, setApiConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const [locRes, obsRes] = await Promise.all([
+          ApiClient.getLocations(1, 10).catch(() => null),
+          ApiClient.getLatestPollution(10).catch(() => null),
+        ]);
+
+        if (mounted) {
+          if (locRes?.success && locRes.data) {
+            setLocations(locRes.data);
+            setApiConnected(true);
+          }
+          if (obsRes?.success && obsRes.data && obsRes.data.length > 0) {
+            setLiveObservations(obsRes.data);
+            setDataSource("api");
+          } else {
+            // No live data yet in database -> default to labeled demo mode
+            setDataSource("demo");
+          }
+        }
+      } catch {
+        if (mounted) {
+          setApiConnected(false);
+          setDataSource("demo");
+        }
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    loadData();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const getStatusBadgeVariant = (status: MetricInfo["status"]) => {
     switch (status) {
@@ -105,20 +152,44 @@ export const AQIOverviewSection: React.FC = () => {
         description="Comprehensive dashboard breakdown of primary environmental parameters, measurement units, and World Health Organization recommended safety limits."
       />
 
-      {/* Explicit Disclaimer Banner */}
-      <div className="max-w-4xl mx-auto p-3.5 rounded-lg bg-[#141B23] border border-amber-500/25 flex items-center justify-between text-xs text-[#A5B0BC] font-mono">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-          <span>
-            <strong className="text-[#F5F7FA]">Demo Dataset Display:</strong> Measurements in this section are illustrative samples demonstrating system metrics. Live sensor telemetry connects in Module 02 API pipelines.
-          </span>
+      {/* Backend API Connection & Data Source Banner */}
+      <div className="max-w-4xl mx-auto p-4 rounded-xl bg-[#141B23] border border-white/[0.09] flex flex-col sm:flex-row sm:items-center justify-between text-xs text-[#A5B0BC] font-mono gap-3">
+        <div className="flex items-center gap-2.5">
+          <Database className={`w-4 h-4 ${apiConnected ? "text-[#38E0B4]" : "text-amber-400"} flex-shrink-0`} />
+          <div>
+            <span className="text-[#F5F7FA] font-bold">Data Mode: </span>
+            {dataSource === "api" ? (
+              <span className="text-[#38E0B4]">Live PostgreSQL Observations Active</span>
+            ) : (
+              <span className="text-amber-400">
+                {liveObservations.length === 0 && apiConnected
+                  ? "Connected to Database (0 live observations recorded). Showing Labeled Demo Dataset."
+                  : "Offline / Standby Mode. Showing Labeled Demo Dataset."}
+              </span>
+            )}
+          </div>
         </div>
-        <Badge variant="outline" size="sm" className="hidden sm:inline-flex text-amber-400 border-amber-500/30">
-          Demo Mode
-        </Badge>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Badge
+            variant={dataSource === "api" ? "teal" : "outline"}
+            size="sm"
+            className="font-mono text-[10px]"
+          >
+            {dataSource === "api" ? "LIVE API DATA" : "DEMO DATASET"}
+          </Badge>
+          {apiConnected && liveObservations.length > 0 && (
+            <button
+              onClick={() => setDataSource(dataSource === "api" ? "demo" : "api")}
+              className="text-[11px] text-[#28C7F5] hover:underline"
+            >
+              Switch to {dataSource === "api" ? "Demo Data" : "Live API"}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* 5-Card Grid for AQI, PM2.5, PM10, Temperature, Humidity */}
+      {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-7xl mx-auto">
         {DEMO_METRICS.map((metric) => {
           const isSelected = selectedMetric.id === metric.id;
@@ -164,7 +235,7 @@ export const AQIOverviewSection: React.FC = () => {
         })}
       </div>
 
-      {/* Focused Detail Panel for Selected Metric */}
+      {/* Focused Detail Panel */}
       <div className="max-w-4xl mx-auto">
         <Card className="border-white/[0.09] bg-[#10151B] p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-white/[0.08]">

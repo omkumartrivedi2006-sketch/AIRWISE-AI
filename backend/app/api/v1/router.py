@@ -1,13 +1,8 @@
 """
-AIRWISE AI — API v1 Router Aggregator
-Combines all modular domain routers under the /api/v1 path prefix.
+AIRWISE AI — API v1 Router
+Re-exports the aggregated API router for compatibility.
 """
 
-from fastapi import APIRouter
-from app.api.v1.endpoints import health, ai
+from app.api.v1.api import api_router
 
-api_router = APIRouter()
-
-# Register modular routers
-api_router.include_router(health.router, prefix="", tags=["System Diagnostics"])
-api_router.include_router(ai.router, prefix="/ai", tags=["AI Intelligence Engine"])
+__all__ = ["api_router"]

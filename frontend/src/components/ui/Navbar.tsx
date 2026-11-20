@@ -27,7 +27,7 @@ export const Navbar: React.FC = () => {
     let mounted = true;
     ApiClient.getHealth()
       .then((health) => {
-        if (mounted) setBackendStatus(health.status === "healthy" ? "online" : "online");
+        if (mounted) setBackendStatus(health.success ? "online" : "offline");
       })
       .catch(() => {
         if (mounted) setBackendStatus("offline");

@@ -1,6 +1,6 @@
 # AIRWISE AI — GenAI-Powered Pollution Intelligence Platform
 
-[![Status: Module 02 Completed](https://img.shields.io/badge/Status-Module_02_UI/UX_Ready-28C7F5.svg)](#current-development-status)
+[![Status: Module 03 Completed](https://img.shields.io/badge/Status-Module_03_Backend_API_Ready-28C7F5.svg)](#current-development-status)
 [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI_0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Frontend: Next.js](https://img.shields.io/badge/Frontend-Next.js_15_App_Router-black.svg)](https://nextjs.org)
 [![AI: Google Gemini](https://img.shields.io/badge/AI-Google_Gemini_API-8E75C2.svg)](https://aistudio.google.com)
@@ -88,6 +88,29 @@ AIRWISE AI bridges the gap between environmental sensor networks and personal he
 
 ## 5. Installation & Quick Start
 
+### Prerequisites
+- Node.js 18+ and npm
+- Python 3.11+ (or 3.14 as tested)
+- PostgreSQL 15+ **or** Docker (for local dev database)
+
+### PostgreSQL via Docker (Recommended for Local Dev)
+```bash
+docker run --name airwise-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=airwise_ai \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+```
+
+Then set your `.env`:
+```env
+DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/airwise_ai
+GEMINI_API_KEY=your_key_here
+```
+
+> **Note:** Without a PostgreSQL connection, the backend falls back to a local SQLite database (`airwise_local.db`) for zero-friction local evaluation.
+
 ### Frontend Startup
 ```bash
 cd frontend
@@ -99,11 +122,30 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Backend Startup
 ```bash
 cd backend
-.\venv\Scripts\Activate.ps1
+python -m venv venv
+.\venv\Scripts\Activate.ps1        # Windows
+pip install -r requirements.txt
+alembic upgrade head               # Apply database migrations
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 - Health Check: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
-- API Docs: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
+- Interactive API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+- OpenAPI JSON: [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json)
+
+### Run Backend Tests
+```bash
+cd backend
+.\venv\Scripts\Activate.ps1
+pytest tests -v
+```
+Expected: **16 passed** (unit + integration, using in-memory SQLite fixture)
+
+### Alembic Migration Commands
+```bash
+alembic upgrade head       # Apply all migrations
+alembic downgrade base     # Roll back all migrations
+alembic history            # View migration history
+```
 
 ---
 
@@ -113,7 +155,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 | :--- | :--- | :--- | :--- |
 | **Module 01** | **Project Foundation, Architecture & Setup** | Monorepo structure, Next.js app shell, FastAPI backend, DB & AI foundations | **Completed** |
 | **Module 02** | **Landing Page UI/UX & Frontend Implementation** | 9 landing sections, design tokens, responsive layout, placeholder routes | **Completed** |
-| **Module 03** | **Pollution Data Ingestion & Environmental APIs** | Live AQI data pipelines, pollutant telemetry, normalization, caching | Scheduled Next |
+| **Module 03** | **Backend Engineering, REST API & PostgreSQL Integration** | 6 SQLAlchemy models, Alembic migrations, full REST API (health, locations, pollution, conversations, messages, feedback), Pydantic v2 schemas, frontend API client, 16 passing tests | **Completed** |
 | **Module 04** | **Core AI Intelligence & Gemini Assistant Engine** | Gemini API integration, context-grounded prompt templates, health advisory agent | Scheduled |
 | **Module 05** | **Interactive Dashboard & Environmental Visualizations** | Geospatial air maps, historical pollutant trends, analytics charts | Scheduled |
 | **Module 06** | **User Personalization & Real-Time Alert System** | Exposure profiles, asthma/vulnerability presets, notifications | Scheduled |

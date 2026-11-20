@@ -13,7 +13,7 @@ export const Header: React.FC = () => {
     ApiClient.getHealth()
       .then((health) => {
         if (mounted) {
-          setBackendStatus(health.status === "healthy" ? "online" : "online");
+          setBackendStatus(health.success ? "online" : "offline");
         }
       })
       .catch(() => {
