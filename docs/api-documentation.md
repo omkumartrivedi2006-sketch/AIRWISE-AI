@@ -264,7 +264,84 @@ Submit a natural language query for environmental health analysis.
 
 ---
 
-## 8. PostgreSQL Setup (Local Development)
+## 8. Authentication & Authorization API (Module 04)
+
+All authentication endpoints reside under `/api/v1/auth`.
+
+| Method | Endpoint | Description | Auth Required |
+|:---|:---|:---|:---|
+| `POST` | `/api/v1/auth/register` | Register new user account | None |
+| `POST` | `/api/v1/auth/login` | Authenticate with email & password | None |
+| `POST` | `/api/v1/auth/refresh` | Rotate access & refresh token pair | Cookie or Body |
+| `POST` | `/api/v1/auth/logout` | Revoke current session & clear cookies | Authenticated |
+| `POST` | `/api/v1/auth/logout-all` | Revoke all active sessions for user | Authenticated |
+| `GET` | `/api/v1/auth/me` | Fetch active user credentials & role | Authenticated |
+| `POST` | `/api/v1/auth/change-password` | Update account password with verification | Authenticated |
+| `POST` | `/api/v1/auth/forgot-password` | Request password reset token via email | None |
+| `POST` | `/api/v1/auth/reset-password` | Reset password using emailed token | None |
+| `POST` | `/api/v1/auth/verify-email` | Verify account email address | None |
+| `POST` | `/api/v1/auth/resend-verification` | Re-send verification link to email | None |
+
+### `POST /api/v1/auth/register`
+**Request Body**:
+```json
+{
+  "full_name": "Dr. Sarah Lin",
+  "email": "sarah.lin@example.com",
+  "password": "SecurePassword123!"
+}
+```
+**Response `201`**:
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "id": 1,
+      "full_name": "Dr. Sarah Lin",
+      "email": "sarah.lin@example.com",
+      "role": "USER",
+      "is_active": true,
+      "is_verified": false,
+      "created_at": "2026-11-20T12:00:00Z"
+    },
+    "tokens": {
+      "access_token": "eyJhbGciOi...",
+      "refresh_token": "eyJhbGciOi...",
+      "token_type": "bearer",
+      "expires_in": 900
+    }
+  }
+}
+```
+
+### `POST /api/v1/auth/login`
+**Request Body**:
+```json
+{
+  "email": "sarah.lin@example.com",
+  "password": "SecurePassword123!"
+}
+```
+**Response `200`**: Sets `access_token` and `refresh_token` HttpOnly cookies and returns token payload.
+
+---
+
+## 9. User Profile Management API (Module 04)
+
+All user management endpoints reside under `/api/v1/users`.
+
+### `GET /api/v1/users/me`
+Retrieves detailed profile information for the authenticated user.
+**Headers**: `Authorization: Bearer <access_token>` or HttpOnly cookie.
+
+### `PATCH /api/v1/users/me`
+Update profile details (`full_name`, `profile_image`). Attempts to modify protected fields (`role`, `is_verified`, `is_active`, `password_hash`) are rejected or ignored.
+
+---
+
+## 10. PostgreSQL Setup (Local Development)
 
 Start a local PostgreSQL instance via Docker:
 ```bash

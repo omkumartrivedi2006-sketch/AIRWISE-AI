@@ -11,10 +11,11 @@ This roadmap outlines the progressive evolution of AIRWISE AI from project incep
 | **Module 01** | **Project Foundation, Architecture & Setup** | Monorepo structure, Next.js app shell, FastAPI backend, DB & AI foundations, design system | **Completed** |
 | **Module 02** | **Landing Page UI/UX & Frontend Implementation** | 9 landing sections, design tokens, responsive layout, placeholder routes, demo data labeling | **Completed** |
 | **Module 03** | **Backend Engineering, REST API & PostgreSQL Integration** | Layered FastAPI backend, 6 ORM models, Alembic migrations, full REST API + frontend integration | **Completed** |
-| **Module 04** | **Core AI Intelligence & Gemini Assistant Engine** | Gemini API integration, context-grounded prompt templates, health advisory agent | Scheduled |
-| **Module 05** | **Interactive Dashboard & Environmental Visualizations** | Geospatial air maps, historical pollutant trends, analytics charts, comparative metrics | Scheduled |
-| **Module 06** | **User Personalization & Real-Time Alert System** | Exposure profiles, asthma/vulnerability presets, notifications, automated action plans | Scheduled |
-| **Module 07** | **Production Hardening, Testing & Cloud Deployment** | Dockerization, CI/CD, rate limiting, security audits, cloud deployment guides | Scheduled |
+| **Module 04** | **Secure Authentication, Authorization & User Management** | Argon2id hashing, dual-token JWT, refresh token rotation, HttpOnly cookies, RBAC, Auth UI | **Completed** |
+| **Module 05** | **Core AI Intelligence & Gemini Assistant Engine** | Gemini API integration, context-grounded prompt templates, health advisory agent | Scheduled |
+| **Module 06** | **Interactive Dashboard & Environmental Visualizations** | Geospatial air maps, historical pollutant trends, analytics charts, comparative metrics | Scheduled |
+| **Module 07** | **User Personalization & Real-Time Alert System** | Exposure profiles, asthma/vulnerability presets, notifications, automated action plans | Scheduled |
+| **Module 08** | **Production Hardening, Testing & Cloud Deployment** | Dockerization, CI/CD, rate limiting, security audits, cloud deployment guides | Scheduled |
 
 ---
 
@@ -64,4 +65,18 @@ This roadmap outlines the progressive evolution of AIRWISE AI from project incep
 
 ---
 
-### Module 04: Core AI Intelligence & Gemini Assistant Engine
+### Module 04: Secure Authentication, Authorization & User Management
+- [x] **Secure Password Management**: Argon2id password hashing via `argon2-cffi` (`time_cost=2`, `memory_cost=65536`). Enforced enterprise password complexity (min 12 chars, uppercase, lowercase, numbers, symbols, common weak password blacklist).
+- [x] **Dual-Token JWT Architecture**: Short-lived access tokens (15 mins) and rotating refresh tokens (7 days). Token revocation and reuse attack detection (revoking all user sessions upon reuse of an already-invalidated refresh token).
+- [x] **Session Storage & Cookie Security**: HttpOnly, SameSite=Lax, Secure cookies (`access_token`, `refresh_token`) preventing XSS token exfiltration, combined with Bearer fallback.
+- [x] **Extended User Entity**: Added `password_hash`, `profile_image`, `is_verified`, `role` (USER/ADMIN), `last_login_at` with full Alembic migration `002_auth_and_user_management.py`.
+- [x] **Dedicated Token Entities**: `RefreshToken`, `PasswordResetToken`, `EmailVerificationToken` with SHA-256 hash storage.
+- [x] **Complete Auth API**: 11 `/api/v1/auth` endpoints (`register`, `login`, `refresh`, `logout`, `logout-all`, `me`, `change-password`, `verify-email`, `resend-verification`, `forgot-password`, `reset-password`).
+- [x] **Role-Based Access Control (RBAC)**: `require_authenticated_user` and `require_admin` FastAPI dependencies.
+- [x] **User Management API**: `/api/v1/users/me` with protected attribute guards preventing privilege escalation.
+- [x] **Frontend Authentication UI & State**: `AuthContext`, `useAuth`, `AuthGuard` protecting `/dashboard`, `/assistant`, `/profile`. Fully implemented pages for `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/profile`.
+- [x] **Automated Test Coverage**: 28 unit and integration tests passing (`pytest tests -v`). Zero TypeScript compilation errors.
+
+---
+
+### Module 05: Core AI Intelligence & Gemini Assistant Engine

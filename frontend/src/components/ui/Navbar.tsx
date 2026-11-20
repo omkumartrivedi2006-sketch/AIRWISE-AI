@@ -3,17 +3,19 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Wind, Menu, ArrowRight, Activity, ShieldCheck } from "lucide-react";
+import { Wind, Menu, ArrowRight, Activity, ShieldCheck, User, LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
 import { Button } from "./Button";
 import { Badge } from "./Badge";
 import { MobileNavigation } from "./MobileNavigation";
 import { ApiClient } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking");
   const pathname = usePathname();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,18 +110,57 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Sign In
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard"
+                  className="text-xs text-[#A5B0BC] hover:text-[#28C7F5] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#141B23] border border-white/[0.09] hover:border-[#28C7F5]/50 transition-colors group"
+                >
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#28C7F5] to-[#38E0B4] flex items-center justify-center text-[#080A0D] font-bold text-xs">
+                    {user?.full_name ? user.full_name[0].toUpperCase() : "U"}
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-medium text-[#F5F7FA] max-w-[100px] truncate">
+                      {user?.full_name || user?.email}
+                    </span>
+                    <span className="text-[9px] text-[#A5B0BC] uppercase tracking-wider font-mono">
+                      {user?.role || "USER"}
+                    </span>
+                  </div>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-[#A5B0BC] hover:text-red-400 p-2"
+                  onClick={() => logout()}
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    Sign In
+                  </Button>
+                </Link>
 
-            <Link href="/register">
-              <Button variant="primary" size="sm" className="text-xs">
-                Get Started
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Button>
-            </Link>
+                <Link href="/register">
+                  <Button variant="primary" size="sm" className="text-xs">
+                    Get Started
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Hamburger Button */}

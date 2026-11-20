@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ApiClient } from "@/services/api";
 import { LocationItem, PollutionObservationItem } from "@/types";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 interface StationOverview {
   id?: number;
@@ -112,6 +113,14 @@ function determineCategory(aqi: number): StationOverview["category"] {
 }
 
 export default function DashboardPage() {
+  return (
+    <AuthGuard>
+      <DashboardContent />
+    </AuthGuard>
+  );
+}
+
+function DashboardContent() {
   const [stations, setStations] = useState<StationOverview[]>(FALLBACK_STATIONS);
   const [selectedStation, setSelectedStation] = useState<StationOverview>(FALLBACK_STATIONS[0]);
   const [isLoading, setIsLoading] = useState<boolean>(true);

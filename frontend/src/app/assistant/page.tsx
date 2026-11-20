@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ApiClient } from "@/services/api";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 interface MessageView {
   id?: number;
@@ -28,6 +29,14 @@ interface MessageView {
 }
 
 export default function AssistantPage() {
+  return (
+    <AuthGuard>
+      <AssistantContent />
+    </AuthGuard>
+  );
+}
+
+function AssistantContent() {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<MessageView[]>([
     {

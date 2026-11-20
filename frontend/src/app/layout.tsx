@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,9 +24,11 @@ export default function RootLayout({
           <div className="absolute top-1/3 -right-48 w-[650px] h-[450px] bg-[#38E0B4]/[0.04] rounded-full blur-[120px]" />
         </div>
 
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

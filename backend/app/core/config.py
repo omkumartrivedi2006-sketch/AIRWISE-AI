@@ -28,11 +28,29 @@ class Settings(BaseSettings):
     BACKEND_PORT: int = 8000
     API_V1_PREFIX: str = "/api/v1"
 
-    # Security
+    # Security & JWT Authentication
     SECRET_KEY: str = Field(
         default="airwise-insecure-dev-secret-key-replace-in-production-32chars",
         description="Cryptographic secret key for signing internal tokens",
     )
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 60
+    EMAIL_VERIFICATION_EXPIRE_HOURS: int = 24
+
+    # Cookie Settings
+    COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: str = "lax"
+    COOKIE_DOMAIN: Union[str, None] = None
+
+    # Email Service
+    EMAIL_PROVIDER: str = "console"  # console, smtp, mock
+    EMAIL_API_KEY: str = ""
+    EMAIL_FROM: str = "noreply@airwise.ai"
+    FRONTEND_URL: str = "http://localhost:3000"
+    BACKEND_URL: str = "http://localhost:8000"
+
     ALLOWED_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",

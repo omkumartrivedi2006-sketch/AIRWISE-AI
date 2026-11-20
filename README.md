@@ -1,9 +1,9 @@
 # AIRWISE AI — GenAI-Powered Pollution Intelligence Platform
 
-[![Status: Module 03 Completed](https://img.shields.io/badge/Status-Module_03_Backend_API_Ready-28C7F5.svg)](#current-development-status)
+[![Status: Module 04 Completed](https://img.shields.io/badge/Status-Module_04_Auth_Ready-38E0B4.svg)](#current-development-status)
 [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI_0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Frontend: Next.js](https://img.shields.io/badge/Frontend-Next.js_15_App_Router-black.svg)](https://nextjs.org)
-[![AI: Google Gemini](https://img.shields.io/badge/AI-Google_Gemini_API-8E75C2.svg)](https://aistudio.google.com)
+[![Security: Argon2id + JWT](https://img.shields.io/badge/Security-Argon2id_&_Dual_JWT-28C7F5.svg)](https://cheatsheetseries.owasp.org/)
 [![Database: PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL_&_SQLAlchemy_2.0-336791.svg)](https://www.postgresql.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -75,11 +75,15 @@ AIRWISE AI bridges the gap between environmental sensor networks and personal he
 | Route | Purpose | Status |
 | :--- | :--- | :--- |
 | `/` | Landing page (All 9 sections: Nav, Hero, AQI Overview, Features, How It Works, AI Preview, Awareness, CTA, Footer) | **Completed** |
-| `/dashboard` | Interactive telemetry dashboard preview (station switcher, metrics grid, 24h trend skeleton) | **Completed** |
-| `/assistant` | Dedicated AI assistant conversation view with disclaimer and simulated reasoning | **Completed** |
+| `/dashboard` | Interactive telemetry dashboard preview (station switcher, metrics grid, 24h trend) — **Protected** | **Completed** |
+| `/assistant` | Dedicated AI assistant conversation view with disclaimer and simulated reasoning — **Protected** | **Completed** |
+| `/profile` | User account management, personal details, password change, active sessions — **Protected** | **Completed** |
+| `/login` | Secure login interface with remember-me, password visibility toggle, error handling | **Completed** |
+| `/register` | Secure registration interface with real-time password complexity checklist | **Completed** |
+| `/forgot-password` | Password recovery request interface | **Completed** |
+| `/reset-password` | Password reset interface validating recovery token | **Completed** |
+| `/verify-email` | Email verification confirmation interface | **Completed** |
 | `/about` | Mission statement, WHO/EPA guidelines, architectural principles | **Completed** |
-| `/login` | Authentication placeholder with credentials form and brand shell | **Completed** |
-| `/register` | Registration placeholder with vulnerability profile presets (asthma, cardio, child, athlete) | **Completed** |
 | `/contact` | Project contact & developer inquiry form | **Completed** |
 | `/privacy` | Privacy policy detailing zero data selling and local storage | **Completed** |
 | `/terms` | Terms of service and medical/environmental disclaimer | **Completed** |

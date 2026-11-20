@@ -49,6 +49,56 @@ class AIServiceException(AirwiseException):
         )
 
 
+class BadRequestException(AirwiseException):
+    def __init__(self, message: str = "Bad Request", details: Optional[Any] = None):
+        super().__init__(
+            message=message,
+            code="BAD_REQUEST",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            details=details,
+        )
+
+
+class UnauthorizedException(AirwiseException):
+    def __init__(self, message: str = "Unauthorized", details: Optional[Any] = None):
+        super().__init__(
+            message=message,
+            code="UNAUTHORIZED",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            details=details,
+        )
+
+
+class ForbiddenException(AirwiseException):
+    def __init__(self, message: str = "Forbidden", details: Optional[Any] = None):
+        super().__init__(
+            message=message,
+            code="FORBIDDEN",
+            status_code=status.HTTP_403_FORBIDDEN,
+            details=details,
+        )
+
+
+class NotFoundException(AirwiseException):
+    def __init__(self, message: str = "Resource Not Found", details: Optional[Any] = None):
+        super().__init__(
+            message=message,
+            code="NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+            details=details,
+        )
+
+
+class ConflictException(AirwiseException):
+    def __init__(self, message: str = "Conflict", details: Optional[Any] = None):
+        super().__init__(
+            message=message,
+            code="CONFLICT",
+            status_code=status.HTTP_409_CONFLICT,
+            details=details,
+        )
+
+
 def create_error_response(
     status_code: int,
     code: str,

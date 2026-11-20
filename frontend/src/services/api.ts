@@ -1,6 +1,7 @@
 /**
  * AIRWISE AI — Centralized API Client Service
  * Fully typed communication layer connecting Next.js frontend with FastAPI backend.
+ * Supports HttpOnly cookie authentication and in-memory JWT bearer credentials.
  */
 
 import {
@@ -18,24 +19,48 @@ import {
   AIQueryResponse,
 } from "@/types";
 
+import {
+  User,
+  TokenResponseData,
+  RegisterPayload,
+  LoginPayload,
+  ChangePasswordPayload,
+  ResetPasswordPayload,
+  ProfileUpdatePayload,
+} from "@/types/auth";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:8000/api/v1";
 
 export class ApiClient {
+  private static accessToken: string | null = null;
+
+  public static setAccessToken(token: string | null) {
+    this.accessToken = token;
+  }
+
+  public static getAccessToken(): string | null {
+    return this.accessToken;
+  }
+
   private static async request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
     const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${API_BASE_URL}${cleanEndpoint}`;
 
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
+      ...(options?.headers as Record<string, string> || {}),
+    };
+
     try {
       const response = await fetch(url, {
         ...options,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          ...options?.headers,
-        },
+        credentials: "include",
+        headers,
       });
 
       const responseData = await response.json().catch(() => ({}));
@@ -53,6 +78,104 @@ export class ApiClient {
       const message = err instanceof Error ? err.message : "Unknown network error";
       throw new Error(`API ${endpoint} Error: ${message}`);
     }
+  }
+
+  // ==========================================
+  // Authentication & Session Management (Module 04)
+  // ==========================================
+  public static async register(data: RegisterPayload): Promise<ApiResponse<User>> {
+    return this.request<User>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async login(data: LoginPayload): Promise<ApiResponse<TokenResponseData>> {
+    const res = await this.request<TokenResponseData>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (res.success && res.data?.access_token) {
+      this.setAccessToken(res.data.access_token);
+    }
+    return res;
+  }
+
+  public static async refreshSession(): Promise<ApiResponse<TokenResponseData>> {
+    const res = await this.request<TokenResponseData>("/auth/refresh", {
+      method: "POST",
+    });
+    if (res.success && res.data?.access_token) {
+      this.setAccessToken(res.data.access_token);
+    }
+    return res;
+  }
+
+  public static async logout(): Promise<ApiResponse<{ status: string }>> {
+    try {
+      const res = await this.request<{ status: string }>("/auth/logout", {
+        method: "POST",
+      });
+      this.setAccessToken(null);
+      return res;
+    } catch (err) {
+      this.setAccessToken(null);
+      throw err;
+    }
+  }
+
+  public static async logoutAll(): Promise<ApiResponse<{ revoked_sessions: number }>> {
+    const res = await this.request<{ revoked_sessions: number }>("/auth/logout-all", {
+      method: "POST",
+    });
+    this.setAccessToken(null);
+    return res;
+  }
+
+  public static async getMe(): Promise<ApiResponse<User>> {
+    return this.request<User>("/auth/me");
+  }
+
+  public static async updateMe(data: ProfileUpdatePayload): Promise<ApiResponse<User>> {
+    return this.request<User>("/users/me", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async changePassword(data: ChangePasswordPayload): Promise<ApiResponse<{ status: string }>> {
+    return this.request<{ status: string }>("/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async forgotPassword(email: string): Promise<ApiResponse<{ status: string }>> {
+    return this.request<{ status: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  public static async resetPassword(data: ResetPasswordPayload): Promise<ApiResponse<{ status: string }>> {
+    return this.request<{ status: string }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async verifyEmail(token: string): Promise<ApiResponse<User>> {
+    return this.request<User>("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  public static async resendVerification(email: string): Promise<ApiResponse<{ status: string }>> {
+    return this.request<{ status: string }>("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
   }
 
   // ==========================================

@@ -131,12 +131,29 @@ HTTP Client / Next.js Frontend
 
 ## 3. Security Architecture & Threat Model
 
-1. **Secret Isolation**:
-   - `GEMINI_API_KEY`, database connection strings, and cryptographic salts exist strictly in server-side environment variables loaded via Pydantic `BaseSettings`.
+### 3.1 Authentication & Credential Security (Module 04)
+1. **Password Hashing with Argon2id**:
+   - Implemented via `argon2-cffi` with standard OWASP-recommended parameters (`time_cost=2`, `memory_cost=65536`, `parallelism=1`).
+   - Resistant to GPU/ASIC cracking and side-channel timing attacks.
+   - Enforced complexity policy: minimum 12 characters, uppercase, lowercase, numbers, symbols, and a blacklist of common weak passwords.
+2. **Dual-Token JWT & Refresh Token Rotation**:
+   - Short-lived Access Tokens (15 minutes) signed with HMAC-SHA256 containing minimal payload (`sub`, `role`, `type: access`, `iat`, `exp`).
+   - Long-lived cryptographically secure random Refresh Tokens (7 days) stored hashed (SHA-256) in the database (`refresh_tokens` table).
+   - Atomic single-use rotation: each refresh call revokes the existing refresh token and generates a new pair.
+   - Reuse attack detection: if a revoked refresh token is presented, all refresh tokens belonging to that user are immediately revoked, invalidating all active sessions.
+3. **Session Cookie Isolation & CSRF Protection**:
+   - Tokens can be delivered via `Set-Cookie` headers with `HttpOnly`, `SameSite=Lax`, and `Secure` (in production) flags.
+   - HttpOnly cookies prevent script-level XSS exfiltration of session credentials.
+4. **Role-Based Access Control (RBAC)**:
+   - User roles: `USER` and `ADMIN`.
+   - FastAPI dependency injectors `require_authenticated_user` and `require_admin` guard protected operations.
+   - User profile update guards strictly prevent self-elevation of roles or modification of account verification status.
+5. **Secret Isolation**:
+   - `SECRET_KEY`, `GEMINI_API_KEY`, database connection strings, and cryptographic salts exist strictly in server-side environment variables loaded via Pydantic `BaseSettings`.
    - Frontend accesses backend endpoints only via relative or configured base URLs (`NEXT_PUBLIC_API_URL`).
-2. **CORS Enforcement**:
+6. **CORS Enforcement**:
    - Backend restricts origin headers to authorized frontend hosts.
-3. **Graceful Degradation**:
+7. **Graceful Degradation**:
    - If PostgreSQL or Gemini services are temporarily unreachable, the health check and service endpoints degrade gracefully with structured error codes rather than unhandled 500 crashes.
 
 ---

@@ -2,9 +2,10 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { X, Wind, ArrowRight, UserCheck, ShieldCheck } from "lucide-react";
+import { X, Wind, ArrowRight, UserCheck, ShieldCheck, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "./Button";
 import { Badge } from "./Badge";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   onClose,
   activeSection = "home",
 }) => {
+  const { user, isAuthenticated, logout } = useAuth();
   // Lock body scroll and listen for Escape key
   useEffect(() => {
     if (isOpen) {
@@ -95,17 +97,64 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
         {/* Bottom Actions */}
         <div className="pt-6 border-t border-white/[0.09] space-y-3">
-          <Link href="/login" onClick={onClose} className="block w-full">
-            <Button variant="secondary" size="md" className="w-full">
-              <UserCheck className="w-4 h-4 text-[#28C7F5]" />
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/register" onClick={onClose} className="block w-full">
-            <Button variant="primary" size="md" className="w-full">
-              Get Started
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <div className="p-3 rounded-lg bg-[#141B23] border border-white/[0.09] flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#28C7F5] to-[#38E0B4] flex items-center justify-center text-[#080A0D] font-bold text-xs">
+                  {user?.full_name ? user.full_name[0].toUpperCase() : "U"}
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-medium text-[#F5F7FA] truncate">
+                    {user?.full_name || user?.email}
+                  </span>
+                  <span className="text-[10px] text-[#A5B0BC] uppercase tracking-wider font-mono">
+                    {user?.role || "USER"}
+                  </span>
+                </div>
+              </div>
+
+              <Link href="/dashboard" onClick={onClose} className="block w-full">
+                <Button variant="secondary" size="md" className="w-full justify-start">
+                  <LayoutDashboard className="w-4 h-4 text-[#28C7F5]" />
+                  Dashboard
+                </Button>
+              </Link>
+
+              <Link href="/profile" onClick={onClose} className="block w-full">
+                <Button variant="secondary" size="md" className="w-full justify-start">
+                  <User className="w-4 h-4 text-[#28C7F5]" />
+                  Account Profile
+                </Button>
+              </Link>
+
+              <Button
+                variant="ghost"
+                size="md"
+                className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 justify-start"
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={onClose} className="block w-full">
+                <Button variant="secondary" size="md" className="w-full">
+                  <UserCheck className="w-4 h-4 text-[#28C7F5]" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/register" onClick={onClose} className="block w-full">
+                <Button variant="primary" size="md" className="w-full">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
 
           <div className="pt-2 text-center">
             <Badge variant="cyan" size="sm" dot>
