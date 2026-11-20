@@ -3,7 +3,7 @@
  * Centralized, type-safe communication layer with the FastAPI backend.
  */
 
-import { HealthResponse } from "@/types";
+import { HealthResponse, AIQueryRequest, AIQueryResponse, TelemetryPreviewData } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -36,7 +36,6 @@ export class ApiClient {
       return (await response.json()) as T;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown network error";
-      // In development or when backend is starting, return graceful error wrapper
       throw new Error(`API Request to ${endpoint} failed: ${message}`);
     }
   }
@@ -53,5 +52,15 @@ export class ApiClient {
    */
   public static async getAIStatus(): Promise<{ status: string; provider: string; model: string; is_configured: boolean }> {
     return this.request("/ai/status");
+  }
+
+  /**
+   * Submit contextual AI query (Prepared for Module 03)
+   */
+  public static async queryAI(payload: AIQueryRequest): Promise<AIQueryResponse> {
+    return this.request<AIQueryResponse>("/ai/query", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   }
 }

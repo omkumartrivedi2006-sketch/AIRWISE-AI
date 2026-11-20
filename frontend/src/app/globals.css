@@ -4,12 +4,22 @@
 
 @layer base {
   :root {
-    --background: #070B12;
-    --foreground: #F8FAFC;
+    --background: #080A0D;
+    --background-secondary: #10151B;
+    --background-card: #141B23;
+    --foreground: #F5F7FA;
+    --foreground-secondary: #A5B0BC;
+    --accent-cyan: #28C7F5;
+    --accent-teal: #38E0B4;
+    --border-subtle: rgba(255, 255, 255, 0.09);
   }
 
   * {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
@@ -26,22 +36,22 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #070B12;
+  background: #080A0D;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #19222D;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #28C7F5;
 }
 
 /* Glassmorphism Utilities */
 .glass-panel {
-  background: rgba(11, 17, 30, 0.65);
+  background: rgba(20, 27, 35, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .glass-panel-hover {
@@ -49,19 +59,20 @@
 }
 
 .glass-panel-hover:hover {
-  background: rgba(15, 23, 42, 0.8);
-  border-color: rgba(0, 102, 255, 0.3);
-  box-shadow: 0 10px 30px -10px rgba(0, 102, 255, 0.15);
+  background: rgba(25, 34, 45, 0.85);
+  border-color: rgba(40, 199, 245, 0.35);
+  box-shadow: 0 10px 30px -10px rgba(40, 199, 245, 0.15);
+  transform: translateY(-2px);
 }
 
 .text-gradient-cyan {
-  background: linear-gradient(135deg, #F8FAFC 20%, #00F2FE 80%, #0066FF 100%);
+  background: linear-gradient(135deg, #F5F7FA 20%, #28C7F5 80%, #38E0B4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-blue {
-  background: linear-gradient(135deg, #38BDF8 0%, #0066FF 100%);
+.text-gradient-teal {
+  background: linear-gradient(135deg, #28C7F5 0%, #38E0B4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

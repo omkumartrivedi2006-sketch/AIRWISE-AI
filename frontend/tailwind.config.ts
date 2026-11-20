@@ -10,30 +10,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#070B12",
+        background: {
+          DEFAULT: "#080A0D",
+          secondary: "#10151B",
+          card: "#141B23",
+          cardHover: "#19222D",
+        },
         surface: {
-          DEFAULT: "#0B111E",
-          hover: "#111A2D",
-          border: "rgba(255, 255, 255, 0.08)",
-          glass: "rgba(11, 17, 30, 0.65)",
+          DEFAULT: "#10151B",
+          card: "#141B23",
+          hover: "#19222D",
+          border: "rgba(255, 255, 255, 0.09)",
+          glass: "rgba(20, 27, 35, 0.75)",
         },
         primary: {
-          DEFAULT: "#0066FF",
-          hover: "#0052CC",
-          glow: "rgba(0, 102, 255, 0.25)",
+          DEFAULT: "#28C7F5",
+          hover: "#1AAAD5",
+          glow: "rgba(40, 199, 245, 0.25)",
         },
-        cyan: {
-          accent: "#00F2FE",
-          light: "#22D3EE",
-          glow: "rgba(0, 242, 254, 0.2)",
+        accent: {
+          cyan: "#28C7F5",
+          teal: "#38E0B4",
+          blue: "#1E70F5",
+        },
+        foreground: {
+          DEFAULT: "#F5F7FA",
+          secondary: "#A5B0BC",
+          muted: "#6B7A8D",
         },
         aqi: {
-          good: "#10B981",
+          good: "#38E0B4",
           moderate: "#F59E0B",
           unhealthySensitive: "#F97316",
           unhealthy: "#EF4444",
-          veryUnhealthy: "#8B5CF6",
-          hazardous: "#991B1B",
+          veryUnhealthy: "#C084FC",
+          hazardous: "#F87171",
         },
       },
       fontFamily: {
@@ -53,15 +64,10 @@ const config: Config = {
           "monospace",
         ],
       },
-      backgroundImage: {
-        "radial-glow": "radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.15) 0%, transparent 60%)",
-        "cyan-glow": "radial-gradient(circle at 100% 50%, rgba(0, 242, 254, 0.1) 0%, transparent 50%)",
-        "glass-gradient": "linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)",
-      },
       boxShadow: {
-        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
-        "blue-glow": "0 0 25px -5px rgba(0, 102, 255, 0.3)",
-        "cyan-glow": "0 0 25px -5px rgba(0, 242, 254, 0.3)",
+        card: "0 4px 20px -2px rgba(0, 0, 0, 0.5)",
+        "cyan-glow": "0 0 25px -5px rgba(40, 199, 245, 0.25)",
+        "teal-glow": "0 0 25px -5px rgba(56, 224, 180, 0.25)",
       },
       animation: {
         "pulse-subtle": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",

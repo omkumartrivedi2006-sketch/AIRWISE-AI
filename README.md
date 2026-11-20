@@ -1,6 +1,6 @@
 # AIRWISE AI — GenAI-Powered Pollution Intelligence Platform
 
-[![Status: Module 01 Completed](https://img.shields.io/badge/Status-Module_01_Architecture_Ready-0066FF.svg)](#current-development-status)
+[![Status: Module 02 Completed](https://img.shields.io/badge/Status-Module_02_UI/UX_Ready-28C7F5.svg)](#current-development-status)
 [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI_0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Frontend: Next.js](https://img.shields.io/badge/Frontend-Next.js_15_App_Router-black.svg)](https://nextjs.org)
 [![AI: Google Gemini](https://img.shields.io/badge/AI-Google_Gemini_API-8E75C2.svg)](https://aistudio.google.com)
@@ -40,7 +40,15 @@ AIRWISE AI bridges the gap between environmental sensor networks and personal he
 - **Library**: [React 19](https://react.dev/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/) (Strict type checking)
 - **Styling**: [Tailwind CSS 3.4](https://tailwindcss.com/) with custom design tokens
-- **Design System**: Midnight dark palette (`#070B12`, `#0B111E`), electric blue (`#0066FF`), cyan accents (`#00F2FE`), tasteful glassmorphism, and zero-hero-image compliance.
+- **Design Tokens**:
+  - Primary Background: `#080A0D`
+  - Secondary Background: `#10151B`
+  - Card Background: `#141B23`
+  - Primary Accent: `#28C7F5` (Electric Cyan)
+  - Secondary Accent: `#38E0B4` (Clean Air Mint)
+  - Primary Text: `#F5F7FA`
+  - Secondary Text: `#A5B0BC`
+  - Border: `rgba(255, 255, 255, 0.09)`
 - **Icons**: [Lucide React](https://lucide.dev/)
 
 ### Backend
@@ -62,237 +70,51 @@ AIRWISE AI bridges the gap between environmental sensor networks and personal he
 
 ---
 
-## 4. System Architecture
+## 4. Frontend Route Architecture
 
-```
-User Interface (Browser)
-      ↓
-Next.js 15 Frontend (App Router, React 19, TypeScript)
-      ↓ (HTTP / REST / JSON)
-API Gateway / Ingress Layer
-      ↓
-FastAPI Backend (/api/v1)
-      ├── Centralized Exception Handler
-      ├── Pydantic v2 Request Validation
-      └── Structured JSON Logger
-      ↓
-Service Layer (Domain Logic)
-      ├── AI Service (Google Gemini Provider Abstraction & Prompts)
-      ├── Pollution Data Service (Telemetry Ingestion & AQI Normalization)
-      ├── User Service (Profiles & Vulnerability Presets)
-      └── Analytics Service (Exposure & Trend Modeling)
-      ↓
-SQLAlchemy 2.0 ORM Engine & Alembic Migrations
-      ↓
-PostgreSQL Database
-```
+| Route | Purpose | Status |
+| :--- | :--- | :--- |
+| `/` | Landing page (All 9 sections: Nav, Hero, AQI Overview, Features, How It Works, AI Preview, Awareness, CTA, Footer) | **Completed** |
+| `/dashboard` | Interactive telemetry dashboard preview (station switcher, metrics grid, 24h trend skeleton) | **Completed** |
+| `/assistant` | Dedicated AI assistant conversation view with disclaimer and simulated reasoning | **Completed** |
+| `/about` | Mission statement, WHO/EPA guidelines, architectural principles | **Completed** |
+| `/login` | Authentication placeholder with credentials form and brand shell | **Completed** |
+| `/register` | Registration placeholder with vulnerability profile presets (asthma, cardio, child, athlete) | **Completed** |
+| `/contact` | Project contact & developer inquiry form | **Completed** |
+| `/privacy` | Privacy policy detailing zero data selling and local storage | **Completed** |
+| `/terms` | Terms of service and medical/environmental disclaimer | **Completed** |
 
 ---
 
-## 5. Monorepo Project Structure
+## 5. Installation & Quick Start
 
-```
-AIRWISE-AI/
-├── frontend/                     # Next.js 15 App Router Frontend
-│   ├── src/
-│   │   ├── app/                  # App Router pages, layout, and global CSS
-│   │   │   ├── globals.css       # Design tokens & glassmorphic utilities
-│   │   │   ├── layout.tsx        # Root HTML layout with Header/Footer
-│   │   │   └── page.tsx          # Landing page (zero-hero-image rule)
-│   │   ├── components/
-│   │   │   ├── ui/               # Reusable UI primitives (Button, Card, Badge, Header, Footer)
-│   │   │   └── preview/          # Real-data components (LiveTelemetry, AIIntelligence, Architecture)
-│   │   ├── lib/                  # Utility helpers (cn, formatting)
-│   │   ├── services/             # API client services
-│   │   ├── styles/               # Reusable design tokens
-│   │   └── types/                # TypeScript shared interfaces
-│   ├── package.json              # Frontend npm dependencies
-│   ├── tsconfig.json             # TypeScript configuration
-│   ├── tailwind.config.ts        # Tailwind theme tokens
-│   └── .env.example              # Frontend environment template
-│
-├── backend/                      # FastAPI Python Backend
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── endpoints/    # Modular route handlers (health, ai)
-│   │   │       └── router.py     # Aggregated v1 API router
-│   │   ├── core/
-│   │   │   ├── config.py         # Pydantic BaseSettings management
-│   │   │   ├── exceptions.py     # Centralized exception handling
-│   │   │   └── logging.py        # Structured application logging
-│   │   ├── db/
-│   │   │   └── session.py        # SQLAlchemy engine, session generator & resilience
-│   │   ├── models/               # SQLAlchemy ORM models
-│   │   ├── schemas/              # Pydantic request/response schemas
-│   │   ├── services/             # Domain business logic (ai, pollution, user, analytics)
-│   │   │   └── ai/               # Gemini AI service, prompt templates & provider abstraction
-│   │   └── main.py               # Application factory & ASGI entry point
-│   ├── alembic/                  # Alembic database migration scripts
-│   ├── tests/                    # Pytest test suite (health, routing, errors)
-│   ├── alembic.ini               # Alembic configuration
-│   ├── requirements.txt          # Python backend dependencies
-│   └── .env.example              # Backend environment template
-│
-├── docs/                         # Architecture & Technical Documentation
-│   ├── architecture.md           # System architecture specification
-│   ├── api-documentation.md      # API v1 endpoints & schema reference
-│   └── development-roadmap.md    # Multi-module implementation lifecycle
-│
-├── .env.example                  # Root environment template
-├── .gitignore                    # Comprehensive repository gitignore
-└── README.md                     # Project documentation
-```
-
----
-
-## 6. Installation & Quick Start
-
-### Prerequisites
-- **Node.js**: v18.18+ or v20+ / v25+
-- **Python**: 3.11+ (Python 3.11, 3.12, 3.13, 3.14)
-- **PostgreSQL**: Optional for Module 01 (backend automatically uses resilient fallback if local PostgreSQL is not yet running)
-
----
-
-### Step 1: Clone and Setup Workspace
-
+### Frontend Startup
 ```bash
-git clone <repository_url>
-cd AIRWISE-AI
+cd frontend
+npm install
+npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000)
 
-### Step 2: Environment Configuration
-
-Copy the sample environment files:
-
-```bash
-# Backend environment setup
-cp backend/.env.example backend/.env
-
-# Frontend environment setup
-cp frontend/.env.example frontend/.env.local
-```
-
-Configure your secrets in `backend/.env`:
-- `GEMINI_API_KEY`: Obtain from [Google AI Studio](https://aistudio.google.com/).
-- `DATABASE_URL`: Connection string for PostgreSQL (e.g., `postgresql+psycopg://postgres:postgres@localhost:5432/airwise_db`).
-
----
-
-### Step 3: Backend Setup & Launch
-
-1. Create and activate a Python virtual environment:
-   ```bash
-   cd backend
-   python -m venv venv
-
-   # On Windows (PowerShell):
-   .\venv\Scripts\Activate.ps1
-
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Launch the FastAPI development server:
-   ```bash
-   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-   ```
-
-4. Verify backend health:
-   - Health endpoint: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
-   - Interactive Swagger docs: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
-
----
-
-### Step 4: Frontend Setup & Launch
-
-1. Open a new terminal and navigate to `frontend`:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. Launch the Next.js development server:
-   ```bash
-   npm run dev
-   ```
-
-3. Open the application:
-   - Navigate to [http://localhost:3000](http://localhost:3000)
-
----
-
-## 7. Database Configuration Guide
-
-### Local PostgreSQL Setup
-If you have PostgreSQL installed locally:
-1. Create the database:
-   ```sql
-   CREATE DATABASE airwise_db;
-   ```
-2. Update `backend/.env`:
-   ```env
-   DATABASE_URL=postgresql+psycopg://postgres:yourpassword@localhost:5432/airwise_db
-   ```
-3. Run migrations via Alembic:
-   ```bash
-   cd backend
-   alembic upgrade head
-   ```
-
-### Dockerized PostgreSQL Setup (Alternative)
-You can run a local PostgreSQL container with one command:
-```bash
-docker run --name airwise-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=airwise_db -p 5432:5432 -d postgres:16-alpine
-```
-
-### Cloud Database Option (Supabase / Neon / Cloud SQL)
-Set `DATABASE_URL` in `backend/.env` with your pooled connection URI:
-```env
-DATABASE_URL=postgresql+psycopg://[user]:[password]@[host]:5432/[db]?sslmode=require
-```
-
-*Note: In Module 01, if no PostgreSQL server is available, the backend automatically initializes in resilient fallback mode and reports `"development_mock_fallback"` on `/api/v1/health` without crashing.*
-
----
-
-## 8. Verification & Automated Testing
-
-### Running Backend Unit & Health Tests
+### Backend Startup
 ```bash
 cd backend
-pytest tests/ -v
+.\venv\Scripts\Activate.ps1
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-
-Tests verify:
-- Root endpoint response (`200 OK`).
-- `/api/v1/health` payload structure and subsystem reporting.
-- `/api/v1/ai/status` provider configuration detection.
-- RFC-compliant 404 and validation error handling.
+- Health Check: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
+- API Docs: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
 
 ---
 
-## 9. Current Development Status & Roadmap
+## 6. Current Development Status & Roadmap
 
-| Module | Objective | Status |
-| :--- | :--- | :--- |
-| **Module 01** | **Project Foundation, System Architecture & Initial Setup** | **Completed** |
-| **Module 02** | **Pollution Data Ingestion & Environmental APIs (OpenAQ)** | Scheduled Next |
-| **Module 03** | **Core AI Intelligence Service & Gemini Assistant Engine** | Scheduled |
-| **Module 04** | **Interactive Dashboard, Geospatial Maps & Visualizations** | Scheduled |
-| **Module 05** | **User Personalization, Health Profiles & Alert Triggers** | Scheduled |
-| **Module 06** | **Production Hardening, CI/CD & Cloud Deployment** | Scheduled |
-
----
-
-## 10. Security Compliance
-
-- **Zero Client Secrets**: `GEMINI_API_KEY` and database credentials are strictly retained on the backend server.
-- **CORS Whitelisting**: Strict origin controls restrict API access to approved domains.
-- **Git Protection**: Sensitive environment files (`.env`, `.env.local`) and virtual environments are explicitly excluded in `.gitignore`.
+| Module | Title | Primary Objective | Status |
+| :--- | :--- | :--- | :--- |
+| **Module 01** | **Project Foundation, Architecture & Setup** | Monorepo structure, Next.js app shell, FastAPI backend, DB & AI foundations | **Completed** |
+| **Module 02** | **Landing Page UI/UX & Frontend Implementation** | 9 landing sections, design tokens, responsive layout, placeholder routes | **Completed** |
+| **Module 03** | **Pollution Data Ingestion & Environmental APIs** | Live AQI data pipelines, pollutant telemetry, normalization, caching | Scheduled Next |
+| **Module 04** | **Core AI Intelligence & Gemini Assistant Engine** | Gemini API integration, context-grounded prompt templates, health advisory agent | Scheduled |
+| **Module 05** | **Interactive Dashboard & Environmental Visualizations** | Geospatial air maps, historical pollutant trends, analytics charts | Scheduled |
+| **Module 06** | **User Personalization & Real-Time Alert System** | Exposure profiles, asthma/vulnerability presets, notifications | Scheduled |
+| **Module 07** | **Production Hardening, Testing & Cloud Deployment** | Dockerization, CI/CD, rate limiting, security audits | Scheduled |
