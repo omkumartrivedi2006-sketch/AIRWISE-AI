@@ -11,7 +11,7 @@ Implements and rigorously validates all 5 critical user journeys:
 import pytest
 from datetime import datetime, timezone, timedelta
 from starlette.testclient import TestClient
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.models.user import User
 from app.models.location import Location
 from app.models.pollution import PollutionObservation

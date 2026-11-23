@@ -7,7 +7,7 @@ system health diagnostics, and audit trail retrieval.
 from datetime import datetime, timezone
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 
 from app.core.config import settings
 from app.core.security import create_access_token

@@ -7,7 +7,7 @@ notification retry idempotency, and audit logging.
 from datetime import datetime, timezone
 import pytest
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 
 from app.models.environmental_review import EnvironmentalDataReview
 from app.models.location import Location

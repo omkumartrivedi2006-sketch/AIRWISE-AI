@@ -42,9 +42,9 @@ jobs:
           ENVIRONMENT: test
           DEBUG: "False"
           RATE_LIMIT_ENABLED: "False"
-          PYTHONPATH: .
         run: |
           cd backend
+          export PYTHONPATH=.
           python -m pytest tests -v
 
   # --------------------------------------------------------------------------
@@ -66,12 +66,11 @@ jobs:
       - name: Install Dependencies
         run: |
           cd frontend
-          npm install --legacy-peer-deps --no-audit
+          npm install --include=dev --legacy-peer-deps --no-audit
 
       - name: Execute Production Build
         env:
           NEXT_TELEMETRY_DISABLED: 1
-          NODE_ENV: production
         run: |
           cd frontend
           npm run build

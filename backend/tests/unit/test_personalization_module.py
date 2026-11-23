@@ -5,7 +5,7 @@ Tests for preferences, saved locations, alert rules, evaluation engine, notifica
 
 from datetime import datetime, timedelta, timezone
 import pytest
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.models.alert import AlertRule
 from app.models.location import Location
 from app.models.notification import Notification
