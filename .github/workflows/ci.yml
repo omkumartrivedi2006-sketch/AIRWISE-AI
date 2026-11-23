@@ -77,12 +77,4 @@ jobs:
           if [ -f .env.example ] && [ ! -f .env ]; then
             cp .env.example .env
           fi
-          echo "Starting next build..."
-          BUILD_OUTPUT=$(npx next build 2>&1) || {
-            BUILD_STATUS=$?
-            echo "$BUILD_OUTPUT"
-            ERROR_MSG=$(echo "$BUILD_OUTPUT" | tail -n 25 | tr '\n' ' ')
-            echo "::error title=Next.js Build Failure::$ERROR_MSG"
-            exit $BUILD_STATUS
-          }
-          echo "$BUILD_OUTPUT"
+          npx next build
