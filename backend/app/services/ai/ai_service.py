@@ -61,7 +61,8 @@ ENVIRONMENTAL_KEYWORDS: Set[str] = {
     "alerts", "rules", "compare", "analytics", "trend", "trends", "forecast", "safe", "hazard", "hazardous",
     "unhealthy", "moderate", "good", "oxygen", "atmosphere", "atmospheric", "climate", "smell", "ventilation",
     "jog", "jogging", "run", "running", "walk", "walking", "exercise", "outdoor", "outdoors", "indoors",
-    "indoor", "safety", "pollen", "soot", "boiler", "chimney", "who-guidelines", "world-health-organization"
+    "indoor", "safety", "pollen", "soot", "boiler", "chimney", "who-guidelines", "world-health-organization",
+    "pm2", "pm", "danger", "dangerous", "toxic", "toxicity", "forecast", "forecasting"
 }
 
 DISALLOWED_KEYWORDS = [
@@ -114,20 +115,24 @@ def is_off_topic_query(text: str) -> bool:
             if not any(k in lower for k in ["pollution", "aqi", "air quality", "environment", "smog"]):
                 return True
 
-    # Tokenize words
-    clean_words = set(
-        lower.replace("?", " ")
+    # Tokenize words with special handling for decimal particulate numbers (pm2.5 -> pm25)
+    normalized = (
+        lower.replace("pm2.5", "pm25")
+        .replace("pm 2.5", "pm25")
+        .replace("pm10", "pm10")
+        .replace("pm 10", "pm10")
+        .replace("?", " ")
         .replace("!", " ")
         .replace(".", " ")
         .replace(",", " ")
         .replace(":", " ")
         .replace(";", " ")
         .replace("-", " ")
-        .split()
     )
+    clean_words = set(normalized.split())
 
     # Check multi-word environmental terms
-    multi_word_terms = ["air quality", "who guideline", "who standard", "world health organization", "pm 2.5", "pm 10"]
+    multi_word_terms = ["air quality", "who guideline", "who standard", "world health organization", "pm 2.5", "pm 10", "pm2.5", "pm10"]
     has_multi_word = any(term in lower for term in multi_word_terms)
 
     # If prompt contains zero environmental keywords and no multi-word matches, it is strictly off-topic
@@ -451,6 +456,8 @@ class AIService:
                     estimated_tokens=len(clean_content) // 4 + len(response_text) // 4,
                 )
             except Exception as exc:
+                if not getattr(self.provider, "is_available", lambda: True)():
+                    raise
                 duration = time.time() - start_time
                 logger.warning("Gemini provider unavailable or unconfigured: %s. Using grounded fallback.", exc)
                 # If Gemini is not configured, supply grounded environmental expertise

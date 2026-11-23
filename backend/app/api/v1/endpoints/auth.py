@@ -59,15 +59,22 @@ async def register(
     # Establish HttpOnly cookies for instant session activation
     set_auth_cookies(response, access_token=access_token, refresh_token=refresh_token)
 
+    user_prof = UserProfileResponse.model_validate(user)
+    token_resp = TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=900,
+        user=user_prof,
+    )
+    combined_data = {
+        **user_prof.model_dump(),
+        **token_resp.model_dump(),
+    }
+
     return SuccessResponse(
         success=True,
         message="Account registered and authenticated successfully.",
-        data=TokenResponse(
-            access_token=access_token,
-            token_type="bearer",
-            expires_in=900,
-            user=UserProfileResponse.model_validate(user),
-        ),
+        data=combined_data,
     )
 
 

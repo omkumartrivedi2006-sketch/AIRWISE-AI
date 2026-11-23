@@ -283,11 +283,8 @@ class MongoSession:
         return DummyTx()
 
     def commit(self) -> None:
-        if not self._dirty:
-            return
-        for key in list(self._dirty):
-            entity = self._tracked.get(key)
-            if entity and hasattr(entity, "id") and hasattr(entity, "get_collection_name") and entity.id is not None:
+        for entity in list(self._tracked.values()):
+            if hasattr(entity, "id") and hasattr(entity, "get_collection_name") and entity.id is not None:
                 coll_name = entity.get_collection_name()
                 doc = entity.to_dict() if hasattr(entity, "to_dict") else dict(entity)
                 doc["id"] = entity.id
