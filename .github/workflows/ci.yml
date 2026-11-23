@@ -73,4 +73,4 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
         run: |
           cd frontend
-          npm run build
+          npx next build
