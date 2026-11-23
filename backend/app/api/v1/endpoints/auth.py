@@ -15,7 +15,7 @@ POST /api/v1/auth/reset-password
 
 from typing import Optional
 from fastapi import APIRouter, Cookie, Depends, Header, Response, status
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.api.deps import (
     clear_auth_cookies,
     get_current_user,
@@ -46,17 +46,28 @@ router = APIRouter()
     "/register",
     status_code=status.HTTP_201_CREATED,
     summary="User Registration",
-    description="Register a new AIRWISE account with Argon2id password hashing and default USER role.",
+    description="Register a new AIRWISE account with Argon2id password hashing, establish session, and default USER role.",
 )
 async def register(
     req: RegisterRequest,
+    response: Response,
     db: Session = Depends(get_db),
 ):
     user, _ = auth_service.register_user(db, req)
+    access_token, refresh_token = auth_service.create_auth_session(db, user)
+
+    # Establish HttpOnly cookies for instant session activation
+    set_auth_cookies(response, access_token=access_token, refresh_token=refresh_token)
+
     return SuccessResponse(
         success=True,
-        message="Account registered successfully. Please verify your email.",
-        data=UserProfileResponse.model_validate(user),
+        message="Account registered and authenticated successfully.",
+        data=TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=900,
+            user=UserProfileResponse.model_validate(user),
+        ),
     )
 
 

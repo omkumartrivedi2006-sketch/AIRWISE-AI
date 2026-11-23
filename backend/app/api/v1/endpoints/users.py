@@ -5,7 +5,7 @@ PATCH /api/v1/users/me
 """
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.api.deps import require_authenticated_user
 from app.core.database import get_db
 from app.models.user import User

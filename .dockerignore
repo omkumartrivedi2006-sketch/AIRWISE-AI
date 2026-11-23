@@ -1,0 +1,15 @@
+.git
+.github
+.next
+node_modules
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+venv
+.env
+.env.local
+.env.*.local
+*.log
+airwise_local.db

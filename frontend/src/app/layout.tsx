@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Navbar } from "@/components/ui/Navbar";
-import { Footer } from "@/components/ui/Footer";
+import { MainLayoutWrapper } from "@/components/layout/MainLayoutWrapper";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,25 +10,69 @@ export const metadata: Metadata = {
     "Real-time air quality telemetry, hyper-local pollutant intelligence, and Google Gemini-powered environmental health advisory.",
 };
 
+const antiExtensionAndThemeScript = `
+  (function() {
+    // 1. Instant Theme Sync
+    try {
+      var savedTheme = localStorage.getItem('airwise_theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+    } catch (e) {
+      document.documentElement.classList.add('light');
+    }
+
+    // 2. Browser Extension Error Isolation (MetaMask, inpage.js, chrome-extension)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('unhandledrejection', function(event) {
+        var reason = event.reason;
+        var msg = reason ? (reason.message || reason.stack || String(reason)) : '';
+        if (
+          msg.indexOf('MetaMask') !== -1 ||
+          msg.indexOf('chrome-extension://') !== -1 ||
+          msg.indexOf('inpage.js') !== -1
+        ) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+
+      window.addEventListener('error', function(event) {
+        var msg = event.message || '';
+        var filename = event.filename || '';
+        if (
+          msg.indexOf('MetaMask') !== -1 ||
+          filename.indexOf('chrome-extension://') !== -1 ||
+          filename.indexOf('inpage.js') !== -1
+        ) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+    }
+  })();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#080A0D] text-[#F5F7FA] antialiased selection:bg-[#28C7F5]/25 selection:text-[#28C7F5] flex flex-col justify-between">
-        {/* Ambient Subtle Radial Glow Highlights (CSS only) */}
-        <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-[#28C7F5]/[0.06] rounded-full blur-[140px]" />
-          <div className="absolute top-1/3 -right-48 w-[650px] h-[450px] bg-[#38E0B4]/[0.04] rounded-full blur-[120px]" />
-        </div>
-
-        <AuthProvider>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-        </AuthProvider>
+    <html lang="en" suppressHydrationWarning className="light">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: antiExtensionAndThemeScript }} />
+      </head>
+      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary flex flex-col justify-between font-sans">
+        <ThemeProvider>
+          <AuthProvider>
+            <MainLayoutWrapper>{children}</MainLayoutWrapper>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

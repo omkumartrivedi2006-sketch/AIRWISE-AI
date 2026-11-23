@@ -4,7 +4,7 @@ Persists and retrieves user and assistant messages for conversational context.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.models.message import Message
 from app.schemas.message import MessageCreate
 

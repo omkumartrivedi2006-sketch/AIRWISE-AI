@@ -2,24 +2,23 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { X, Wind, ArrowRight, UserCheck, ShieldCheck, User, LogOut, LayoutDashboard } from "lucide-react";
+import { X, Wind, ArrowRight, UserCheck, ShieldCheck, User, LogOut, LayoutDashboard, Map, BarChart3, Bot, Bell } from "lucide-react";
 import { Button } from "./Button";
 import { Badge } from "./Badge";
+import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 
 interface MobileNavigationProps {
   isOpen: boolean;
   onClose: () => void;
-  activeSection?: string;
 }
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   isOpen,
   onClose,
-  activeSection = "home",
 }) => {
   const { user, isAuthenticated, logout } = useAuth();
-  // Lock body scroll and listen for Escape key
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -39,90 +38,90 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   if (!isOpen) return null;
 
   const navLinks = [
-    { label: "Home", href: "/#home" },
-    { label: "Air Quality", href: "/#overview" },
-    { label: "Features", href: "/#features" },
-    { label: "How It Works", href: "/#how-it-works" },
-    { label: "AI Assistant", href: "/#assistant" },
-    { label: "Environmental Awareness", href: "/#awareness" },
-    { label: "About", href: "/about" },
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Environmental Analytics", href: "/analytics", icon: BarChart3 },
+    { label: "Pollution Map", href: "/map", icon: Map },
+    { label: "AI Pollution Assistant", href: "/assistant", icon: Bot },
+    { label: "Alerts & Notifications", href: "/notifications", icon: Bell },
   ];
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#080A0D]/80 backdrop-blur-md transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Slide-in Drawer */}
-      <div className="fixed top-0 right-0 bottom-0 w-full max-w-xs bg-[#10151B] border-l border-white/[0.09] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+      <div className="fixed top-0 right-0 bottom-0 w-full max-w-xs bg-surface border-l border-border-subtle shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
         <div>
           {/* Header */}
-          <div className="flex items-center justify-between pb-5 border-b border-white/[0.09]">
+          <div className="flex items-center justify-between pb-5 border-b border-border-subtle">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#28C7F5] to-[#38E0B4] flex items-center justify-center shadow-cyan-glow">
-                <Wind className="w-4 h-4 text-[#080A0D]" strokeWidth={2.5} />
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white dark:text-black shadow-sm">
+                <Wind className="w-4 h-4" strokeWidth={2.5} />
               </div>
-              <span className="font-bold text-base tracking-tight text-[#F5F7FA]">
-                AIRWISE<span className="text-[#28C7F5]">.AI</span>
+              <span className="font-extrabold text-base tracking-tight text-foreground">
+                AIRWISE<span className="text-primary">.AI</span>
               </span>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-[#A5B0BC] hover:text-[#F5F7FA] hover:bg-white/[0.05] transition-colors focus:outline-none"
-              aria-label="Close navigation menu"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors focus:outline-none"
+                aria-label="Close navigation menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="mt-6 flex flex-col space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={onClose}
-                className="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-[#A5B0BC] hover:text-[#28C7F5] hover:bg-[#141B23] transition-all"
-              >
-                <span>{link.label}</span>
-                <ArrowRight className="w-3.5 h-3.5 opacity-40" />
-              </Link>
-            ))}
+          <nav className="mt-6 flex flex-col space-y-1.5">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={onClose}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4 text-primary" />
+                    {link.label}
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 opacity-40" />
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
         {/* Bottom Actions */}
-        <div className="pt-6 border-t border-white/[0.09] space-y-3">
+        <div className="pt-6 border-t border-border-subtle space-y-3">
           {isAuthenticated ? (
             <>
-              <div className="p-3 rounded-lg bg-[#141B23] border border-white/[0.09] flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#28C7F5] to-[#38E0B4] flex items-center justify-center text-[#080A0D] font-bold text-xs">
+              <div className="p-3 rounded-lg bg-background-secondary border border-border-subtle flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white dark:text-black font-bold text-xs">
                   {user?.full_name ? user.full_name[0].toUpperCase() : "U"}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-sm font-medium text-[#F5F7FA] truncate">
+                  <span className="text-sm font-medium text-foreground truncate">
                     {user?.full_name || user?.email}
                   </span>
-                  <span className="text-[10px] text-[#A5B0BC] uppercase tracking-wider font-mono">
+                  <span className="text-[10px] text-foreground-muted uppercase tracking-wider font-mono">
                     {user?.role || "USER"}
                   </span>
                 </div>
               </div>
 
-              <Link href="/dashboard" onClick={onClose} className="block w-full">
-                <Button variant="secondary" size="md" className="w-full justify-start">
-                  <LayoutDashboard className="w-4 h-4 text-[#28C7F5]" />
-                  Dashboard
-                </Button>
-              </Link>
-
               <Link href="/profile" onClick={onClose} className="block w-full">
-                <Button variant="secondary" size="md" className="w-full justify-start">
-                  <User className="w-4 h-4 text-[#28C7F5]" />
+                <Button variant="secondary" size="md" className="w-full justify-start text-xs">
+                  <User className="w-4 h-4 text-primary" />
                   Account Profile
                 </Button>
               </Link>
@@ -130,7 +129,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
               <Button
                 variant="ghost"
                 size="md"
-                className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 justify-start"
+                className="w-full text-red-600 dark:text-red-400 hover:bg-red-500/10 justify-start text-xs"
                 onClick={() => {
                   logout();
                   onClose();
@@ -143,24 +142,18 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
           ) : (
             <>
               <Link href="/login" onClick={onClose} className="block w-full">
-                <Button variant="secondary" size="md" className="w-full">
-                  <UserCheck className="w-4 h-4 text-[#28C7F5]" />
+                <Button variant="secondary" size="md" className="w-full text-xs">
+                  <UserCheck className="w-4 h-4 text-primary" />
                   Sign In
                 </Button>
               </Link>
               <Link href="/register" onClick={onClose} className="block w-full">
-                <Button variant="primary" size="md" className="w-full">
+                <Button variant="primary" size="md" className="w-full text-xs">
                   Get Started
                 </Button>
               </Link>
             </>
           )}
-
-          <div className="pt-2 text-center">
-            <Badge variant="cyan" size="sm" dot>
-              System Online (v1.0)
-            </Badge>
-          </div>
         </div>
       </div>
     </div>

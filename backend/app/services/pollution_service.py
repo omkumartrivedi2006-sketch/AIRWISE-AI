@@ -6,7 +6,7 @@ and sensor telemetry recording.
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.exceptions import AirwiseException
 from app.models.pollution import PollutionObservation
 from app.repositories.location_repository import location_repository

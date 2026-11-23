@@ -4,7 +4,7 @@ Manages dialogue session persistence and retrieval.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.models.conversation import Conversation
 from app.schemas.conversation import ConversationCreate
 

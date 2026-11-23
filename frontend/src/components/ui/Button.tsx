@@ -18,25 +18,25 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#28C7F5]/50 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]";
+    "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]";
 
   const sizeStyles = {
     sm: "px-3 py-1.5 text-xs font-medium gap-1.5",
     md: "px-4 py-2 text-sm gap-2",
-    lg: "px-6 py-3 text-base font-medium gap-2.5",
+    lg: "px-6 py-2.5 text-base font-medium gap-2.5",
   };
 
   const variantStyles = {
     primary:
-      "bg-gradient-to-r from-[#28C7F5] to-[#1AAAD5] text-[#080A0D] font-semibold hover:opacity-95 shadow-cyan-glow border border-[#28C7F5]/30",
+      "bg-primary hover:bg-emerald-600 dark:hover:bg-emerald-400 text-white dark:text-black font-semibold shadow-sm hover:shadow border border-primary/20",
     teal:
-      "bg-gradient-to-r from-[#38E0B4] to-[#2BC49B] text-[#080A0D] font-semibold hover:opacity-95 shadow-teal-glow border border-[#38E0B4]/30",
+      "bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm",
     secondary:
-      "bg-[#141B23] hover:bg-[#19222D] text-[#F5F7FA] border border-white/[0.09] hover:border-white/[0.2]",
+      "bg-surface hover:bg-surface-hover text-foreground border border-border-subtle hover:border-border-strong shadow-sm",
     outline:
-      "bg-transparent hover:bg-white/[0.04] text-[#A5B0BC] hover:text-[#F5F7FA] border border-white/[0.12] hover:border-[#28C7F5]/50",
+      "bg-transparent hover:bg-surface-hover text-foreground-secondary hover:text-foreground border border-border-subtle hover:border-border-strong",
     ghost:
-      "bg-transparent hover:bg-white/[0.05] text-[#A5B0BC] hover:text-[#F5F7FA]",
+      "bg-transparent hover:bg-surface-hover text-foreground-secondary hover:text-foreground",
   };
 
   return (

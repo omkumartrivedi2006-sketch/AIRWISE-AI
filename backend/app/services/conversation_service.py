@@ -4,7 +4,7 @@ Business logic layer managing conversational sessions with privacy scoping.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.exceptions import AirwiseException
 from app.models.conversation import Conversation
 from app.repositories.conversation_repository import conversation_repository

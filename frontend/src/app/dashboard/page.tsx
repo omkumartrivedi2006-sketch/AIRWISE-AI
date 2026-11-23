@@ -1,425 +1,715 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   LayoutDashboard,
-  Gauge,
   MapPin,
   Wind,
   Thermometer,
   Droplets,
   AlertTriangle,
-  ArrowUpRight,
   BarChart3,
   Clock,
   RefreshCw,
   Database,
   Radio,
+  Search,
+  CheckCircle2,
+  ExternalLink,
+  Bot,
+  Activity,
+  Compass,
+  Bell,
+  Sparkles,
+  Star,
+  Bookmark,
+  ShieldAlert,
+  Map as MapIcon,
+  Navigation,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { LocationPermissionModal } from "@/components/location/LocationPermissionModal";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import { ApiClient } from "@/services/api";
-import { LocationItem, PollutionObservationItem } from "@/types";
+import {
+  LocationSearchResult,
+  HistoricalObservationPoint,
+  SavedLocation,
+  RecommendationsResponse,
+} from "@/types";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { useAuth } from "@/hooks/useAuth";
 
-interface StationOverview {
-  id?: number;
+interface DisplayObservation {
+  location_id?: number;
   name: string;
   city: string;
   country: string;
+  latitude: number;
+  longitude: number;
   aqi: number;
-  category: "Good" | "Moderate" | "Sensitive" | "Unhealthy" | "Hazardous";
+  aqi_scale: string;
+  category: "Good" | "Moderate" | "Sensitive" | "Unhealthy" | "Very Unhealthy" | "Hazardous";
   pm25: number;
   pm10: number;
   no2: number;
+  so2: number;
+  co: number;
   o3: number;
-  temp: number;
+  temperature: number;
   humidity: number;
-  source?: string;
-  isLive?: boolean;
+  wind_speed: number;
+  wind_direction?: number;
+  provider: string;
+  source: string;
+  freshness: "live" | "cached" | "delayed" | "unavailable";
+  observed_at: string;
+  is_live: boolean;
 }
 
-const FALLBACK_STATIONS: StationOverview[] = [
-  {
-    name: "Central Anand Vihar Station",
-    city: "New Delhi",
-    country: "India",
-    aqi: 312,
-    category: "Hazardous",
-    pm25: 262.4,
-    pm10: 384.1,
-    no2: 52.8,
-    o3: 24.1,
-    temp: 21,
-    humidity: 68,
-    source: "Demo Dataset",
-    isLive: false,
-  },
-  {
-    name: "Westminster Urban Monitoring Hub",
-    city: "London",
-    country: "United Kingdom",
-    aqi: 42,
-    category: "Good",
-    pm25: 9.8,
-    pm10: 16.2,
-    no2: 24.5,
-    o3: 38.0,
-    temp: 11,
-    humidity: 78,
-    source: "Demo Dataset",
-    isLive: false,
-  },
-  {
-    name: "Manhattan Central Sensor 04",
-    city: "New York",
-    country: "United States",
-    aqi: 58,
-    category: "Moderate",
-    pm25: 14.2,
-    pm10: 22.1,
-    no2: 18.2,
-    o3: 45.3,
-    temp: 14,
-    humidity: 62,
-    source: "Demo Dataset",
-    isLive: false,
-  },
-  {
-    name: "Shinjuku Atmospheric Center",
-    city: "Tokyo",
-    country: "Japan",
-    aqi: 35,
-    category: "Good",
-    pm25: 8.4,
-    pm10: 14.0,
-    no2: 15.6,
-    o3: 32.1,
-    temp: 16,
-    humidity: 55,
-    source: "Demo Dataset",
-    isLive: false,
-  },
+const PRESET_CITIES = [
+  { name: "New Delhi", country: "India", lat: 28.6139, lon: 77.2090 },
+  { name: "Ahmedabad", country: "Gujarat, India", lat: 23.0225, lon: 72.5714 },
+  { name: "Mumbai", country: "Maharashtra, India", lat: 19.0760, lon: 72.8777 },
+  { name: "Gandhinagar", country: "Gujarat, India", lat: 23.2156, lon: 72.6369 },
+  { name: "Surat", country: "Gujarat, India", lat: 21.1702, lon: 72.8311 },
+  { name: "Bengaluru", country: "Karnataka, India", lat: 12.9716, lon: 77.5946 },
+  { name: "Pune", country: "Maharashtra, India", lat: 18.5204, lon: 73.8567 },
+  { name: "Kolkata", country: "West Bengal, India", lat: 22.5726, lon: 88.3639 },
 ];
 
-function determineCategory(aqi: number): StationOverview["category"] {
+function determineCategory(aqi: number): DisplayObservation["category"] {
   if (aqi <= 50) return "Good";
   if (aqi <= 100) return "Moderate";
   if (aqi <= 150) return "Sensitive";
   if (aqi <= 200) return "Unhealthy";
+  if (aqi <= 300) return "Very Unhealthy";
   return "Hazardous";
+}
+
+function getAqiColor(aqi?: number | null): string {
+  if (aqi == null) return "#10B981";
+  if (aqi <= 50) return "#10B981";       // Good (Emerald)
+  if (aqi <= 100) return "#F59E0B";      // Moderate (Amber)
+  if (aqi <= 150) return "#F97316";      // Sensitive (Orange)
+  if (aqi <= 200) return "#EF4444";      // Unhealthy (Red)
+  if (aqi <= 300) return "#8B5CF6";      // Very Unhealthy (Purple)
+  return "#DC2626";                      // Hazardous (Crimson)
+}
+
+function getAqiBadge(category: string) {
+  switch (category) {
+    case "Good":
+      return <Badge variant="good">Good (0-50)</Badge>;
+    case "Moderate":
+      return <Badge variant="moderate">Moderate (51-100)</Badge>;
+    case "Sensitive":
+      return <Badge variant="sensitive">Sensitive (101-150)</Badge>;
+    case "Unhealthy":
+      return <Badge variant="unhealthy">Unhealthy (151-200)</Badge>;
+    case "Very Unhealthy":
+      return <Badge variant="veryUnhealthy">Very Unhealthy (201-300)</Badge>;
+    default:
+      return <Badge variant="hazardous">Hazardous (300+)</Badge>;
+  }
 }
 
 export default function DashboardPage() {
   return (
     <AuthGuard>
-      <DashboardContent />
+      <AppLayout>
+        <DashboardContent />
+      </AppLayout>
     </AuthGuard>
   );
 }
 
 function DashboardContent() {
-  const [stations, setStations] = useState<StationOverview[]>(FALLBACK_STATIONS);
-  const [selectedStation, setSelectedStation] = useState<StationOverview>(FALLBACK_STATIONS[0]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
-  const [lastRefreshed, setLastRefreshed] = useState<string>("Just now");
+  const { user } = useAuth();
+  const geo = useGeolocation();
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const [currentObs, setCurrentObs] = useState<DisplayObservation | null>(null);
+  const [history, setHistory] = useState<HistoricalObservationPoint[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeCity, setActiveCity] = useState<string>("New Delhi");
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Module 08 Personalization & Alert State
+  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
+  const [unreadAlerts, setUnreadAlerts] = useState<number>(0);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [savingLocation, setSavingLocation] = useState<boolean>(false);
+  const [recommendations, setRecommendations] = useState<RecommendationsResponse | null>(null);
+  const [loadingRecs, setLoadingRecs] = useState<boolean>(false);
+
+  // Load recommendations for current observation
+  const loadRecommendations = useCallback(async (locationId: number) => {
+    setLoadingRecs(true);
     try {
-      const [locationsRes, observationsRes] = await Promise.all([
-        ApiClient.getLocations(1, 20).catch(() => null),
-        ApiClient.getLatestPollution(20).catch(() => null),
+      const recRes = await ApiClient.getRecommendations(locationId);
+      if (recRes?.success && recRes.data) {
+        setRecommendations(recRes.data);
+      }
+    } catch {
+      // Non-critical
+    } finally {
+      setLoadingRecs(false);
+    }
+  }, []);
+
+  // Check saved state
+  const checkSavedStatus = useCallback((city: string, savedList: SavedLocation[]) => {
+    const match = savedList.some(
+      (s) => (s.city || "").toLowerCase() === city.toLowerCase() ||
+        (s.location_name || "").toLowerCase() === city.toLowerCase()
+    );
+    setIsSaved(match);
+  }, []);
+
+  // Fetch initial saved locations and unread notifications
+  useEffect(() => {
+    ApiClient.getSavedLocations()
+      .then((res) => {
+        if (res.success && res.data) {
+          setSavedLocations(res.data);
+          if (res.data.length > 0) {
+            checkSavedStatus(activeCity, res.data);
+          }
+        }
+      })
+      .catch(() => { });
+
+    ApiClient.getUnreadNotificationCount()
+      .then((res) => {
+        if (res.success && res.data) {
+          const count = typeof res.data === "number" ? res.data : (res.data as any).unread_count ?? 0;
+          setUnreadAlerts(count);
+        }
+      })
+      .catch(() => { });
+  }, [activeCity, checkSavedStatus]);
+
+  // Load telemetry data from backend
+  const loadLocationData = useCallback(async (
+    params: { city?: string; lat?: number; lon?: number; location_id?: number },
+    forceRefresh: boolean = false
+  ) => {
+    if (forceRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+    setErrorMsg(null);
+
+    try {
+      const queryParams: Record<string, string | number | boolean> = {
+        force_refresh: forceRefresh,
+      };
+      if (params.location_id) queryParams.location_id = params.location_id;
+      if (params.city) queryParams.city = params.city;
+      if (params.lat !== undefined && params.lon !== undefined) {
+        queryParams.lat = params.lat;
+        queryParams.lon = params.lon;
+      }
+
+      const [obsRes, historyRes] = await Promise.all([
+        ApiClient.getPollutionObservation(queryParams),
+        params.city
+          ? ApiClient.getHistoricalObservations({ city: params.city, limit: 24 })
+          : Promise.resolve(null),
       ]);
 
-      if (
-        locationsRes?.success &&
-        locationsRes.data &&
-        locationsRes.data.length > 0 &&
-        observationsRes?.success &&
-        observationsRes.data &&
-        observationsRes.data.length > 0
-      ) {
-        const obsMap = new Map<number, PollutionObservationItem>();
-        observationsRes.data.forEach((obs) => {
-          if (!obsMap.has(obs.location_id)) {
-            obsMap.set(obs.location_id, obs);
-          }
-        });
+      if (obsRes?.success && obsRes.data) {
+        const d = obsRes.data;
+        const aqiVal = d.aqi ?? 0;
+        const display: DisplayObservation = {
+          location_id: d.location_id,
+          name: (d as any).location_name || d.location?.name || d.location?.city || params.city || "Monitored Station",
+          city: (d as any).city || d.location?.city || params.city || "Detected Location",
+          country: (d as any).country || d.location?.country || "Global Network",
+          latitude: (d as any).latitude ?? d.location?.latitude ?? params.lat ?? 0,
+          longitude: (d as any).longitude ?? d.location?.longitude ?? params.lon ?? 0,
+          aqi: aqiVal,
+          aqi_scale: d.aqi_scale || "US_EPA",
+          category: (d.aqi_category as DisplayObservation["category"]) || determineCategory(aqiVal),
+          pm25: d.pm25 ?? 0,
+          pm10: d.pm10 ?? 0,
+          no2: d.no2 ?? 0,
+          so2: d.so2 ?? 0,
+          co: d.co ?? 0,
+          o3: d.o3 ?? 0,
+          temperature: d.temperature ?? 20,
+          humidity: d.humidity ?? 50,
+          wind_speed: d.wind_speed ?? 0,
+          wind_direction: d.wind_direction,
+          provider: d.provider || "open-meteo",
+          source: d.source || "Copernicus CAMS & Ground Stations",
+          freshness: (d.freshness as DisplayObservation["freshness"]) || "live",
+          observed_at: d.observed_at || new Date().toISOString(),
+          is_live: !d.is_demo,
+        };
 
-        const liveStations: StationOverview[] = locationsRes.data.map((loc) => {
-          const obs = obsMap.get(loc.id);
-          const aqi = obs?.aqi ?? 50;
-          return {
-            id: loc.id,
-            name: loc.name,
-            city: loc.city,
-            country: loc.country,
-            aqi,
-            category: determineCategory(aqi),
-            pm25: obs?.pm25 ?? 15.0,
-            pm10: obs?.pm10 ?? 30.0,
-            no2: obs?.no2 ?? 20.0,
-            o3: obs?.o3 ?? 35.0,
-            temp: obs?.temperature ?? 20.0,
-            humidity: obs?.humidity ?? 60.0,
-            source: obs?.source || "PostgreSQL Live Store",
-            isLive: true,
-          };
-        });
-
-        setStations(liveStations);
-        setSelectedStation(liveStations[0]);
-        setIsLiveConnected(true);
-      } else {
-        setStations(FALLBACK_STATIONS);
-        setSelectedStation(FALLBACK_STATIONS[0]);
-        setIsLiveConnected(false);
+        setCurrentObs(display);
+        if (display.city) {
+          setActiveCity(display.city);
+          checkSavedStatus(display.city, savedLocations);
+        }
+        if (d.location_id) {
+          loadRecommendations(d.location_id);
+        }
       }
-      setLastRefreshed(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    } catch {
-      setStations(FALLBACK_STATIONS);
-      setSelectedStation(FALLBACK_STATIONS[0]);
-      setIsLiveConnected(false);
+
+      if (historyRes?.success && historyRes.data) {
+        setHistory(historyRes.data);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to load live pollution observation";
+      setErrorMsg(msg);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [checkSavedStatus, loadRecommendations, savedLocations]);
+
+  // When live coordinates are granted from the hook, automatically load them
+  useEffect(() => {
+    if (geo.status === "granted" && geo.coords) {
+      loadLocationData({
+        lat: geo.coords.latitude,
+        lon: geo.coords.longitude,
+      });
+    }
+  }, [geo.status, geo.coords, loadLocationData]);
+
+  // Initial load default city if no geolocation
+  useEffect(() => {
+    if (geo.status !== "granted") {
+      loadLocationData({ city: "New Delhi" });
+    }
+  }, []);
+
+  // Debounced search handling
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (val.trim().length < 2) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await ApiClient.searchLocations(val.trim(), 5);
+        if (res.success && res.data) {
+          setSearchResults(res.data);
+          setShowDropdown(true);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+  };
+
+  const handleSelectLocation = (loc: LocationSearchResult) => {
+    setSearchQuery(`${loc.name}, ${loc.country}`);
+    setShowDropdown(false);
+    loadLocationData({
+      city: loc.city || loc.name,
+      lat: loc.latitude,
+      lon: loc.longitude,
+    });
+  };
+
+  const handleToggleSaveLocation = async () => {
+    if (!currentObs) return;
+    setSavingLocation(true);
+    try {
+      if (isSaved) {
+        const saved = savedLocations.find(
+          (s) => (s.city || "").toLowerCase() === currentObs.city.toLowerCase()
+        );
+        if (saved) {
+          await ApiClient.deleteSavedLocation(saved.id);
+          const updated = savedLocations.filter((s) => s.id !== saved.id);
+          setSavedLocations(updated);
+          setIsSaved(false);
+        }
+      } else {
+        const res = await ApiClient.saveLocation({
+          location_id: currentObs.location_id ?? 1,
+          custom_name: `${currentObs.city} Station`,
+          city: currentObs.city,
+          latitude: currentObs.latitude,
+          longitude: currentObs.longitude,
+          is_primary: savedLocations.length === 0,
+        });
+        if (res.success && res.data) {
+          const updated = [...savedLocations, res.data];
+          setSavedLocations(updated);
+          setIsSaved(true);
+        }
+      }
+    } catch {
+      // Error handling
+    } finally {
+      setSavingLocation(false);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/[0.09] gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-[#28C7F5]" />
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] tracking-tight">
-              Environmental Telemetry Dashboard
-            </h1>
-          </div>
-          <p className="text-xs sm:text-sm text-[#A5B0BC] mt-1">
-            Real-time multi-pollutant monitoring stations, index categorization, and exposure indicators.
-          </p>
+    <div className="space-y-6">
+      {/* 1. DASHBOARD HERO BANNER (Atmospheric Satellite Visual Banner) */}
+      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-surface p-6 sm:p-8">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-80 dark:opacity-60 overflow-hidden">
+          <Image
+            src="/images/dashboard-banner.svg"
+            alt="Atmospheric Satellite Visual Banner"
+            fill
+            className="object-cover object-right"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/90 to-surface/30" />
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={loadData}
-            disabled={isLoading}
-            className="text-xs font-mono text-[#A5B0BC] hover:text-[#F5F7FA]"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoading ? "animate-spin text-[#28C7F5]" : ""}`} />
-            Refresh
-          </Button>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium">
+              <Activity className="w-3.5 h-3.5 text-primary" />
+              <span>Real-Time Environmental Intelligence</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+              Welcome back, {user?.full_name ? user.full_name.split(" ")[0] : "Researcher"}
+            </h1>
+            <p className="text-xs sm:text-sm text-foreground-secondary leading-relaxed">
+              Global atmospheric telemetry synchronized with Copernicus CAMS and regional surface monitoring stations.
+            </p>
+          </div>
 
-          {isLiveConnected ? (
-            <Badge variant="good" size="md" className="font-mono text-xs flex items-center gap-1.5">
-              <Radio className="w-3.5 h-3.5 animate-pulse text-[#38E0B4]" />
-              Live PostgreSQL Feed
-            </Badge>
-          ) : (
-            <Badge variant="outline" size="md" className="font-mono text-xs text-amber-400 border-amber-500/30 flex items-center gap-1.5">
-              <Database className="w-3.5 h-3.5 text-amber-400" />
-              Demo Sensor Dataset
-            </Badge>
-          )}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                currentObs &&
+                loadLocationData(
+                  { city: currentObs.city, lat: currentObs.latitude, lon: currentObs.longitude },
+                  true
+                )
+              }
+              disabled={isLoading || isRefreshing}
+              className="text-xs font-mono"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
+              Sync Sensors
+            </Button>
+
+            <Link href="/map">
+              <Button variant="primary" size="sm" className="text-xs">
+                <MapIcon className="w-3.5 h-3.5 mr-1.5" />
+                Live Map
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Connectivity Status Banner */}
-      {!isLiveConnected && (
-        <div className="p-3.5 rounded-lg bg-[#141B23] border border-amber-500/30 flex items-center gap-2.5 text-xs text-[#A5B0BC] font-mono">
-          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-          <span>
-            <strong className="text-[#F5F7FA]">Demo Sensor Shell Active:</strong> No live telemetry records were returned by the backend API. Showing benchmark reference locations. Connect live OpenAQ feeds or populate PostgreSQL via <code className="text-[#28C7F5]">POST /api/v1/pollution</code> to switch to live feed.
-          </span>
+      {/* 2. LIVE LOCATION PERMISSION & GEOLOCATION EXPERIENCE */}
+      <LocationPermissionModal
+        status={geo.status}
+        coords={geo.coords}
+        error={geo.error}
+        onRequest={geo.requestLocation}
+        onDismiss={geo.dismissPrompt}
+        onManualSelect={() => searchInputRef.current?.focus()}
+      />
+
+      {/* 3. ERROR BANNER */}
+      {errorMsg && (
+        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-700 dark:text-red-300 font-mono">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 text-red-500" />
+          <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Station Selector Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <span className="text-xs font-mono text-[#6B7A8D] flex-shrink-0">
-          Available Stations:
-        </span>
-        {stations.map((st, idx) => (
-          <button
-            key={st.id ? `id-${st.id}` : `idx-${idx}-${st.name}`}
-            onClick={() => setSelectedStation(st)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 flex-shrink-0 ${
-              selectedStation.name === st.name
-                ? "bg-[#28C7F5]/20 text-[#28C7F5] border border-[#28C7F5]/40"
-                : "bg-[#141B23] text-[#A5B0BC] border border-white/[0.06] hover:text-[#F5F7FA]"
-            }`}
-          >
-            <MapPin className="w-3 h-3" />
-            <span>{st.city} ({st.country})</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Core Telemetry Overview Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: AQI Status Dial */}
-        <Card className="lg:col-span-5 p-6 bg-[#141B23] border-white/[0.09] space-y-6">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-            <div>
-              <span className="text-xs font-mono text-[#28C7F5] uppercase">
-                Monitoring Location
-              </span>
-              <h3 className="text-lg font-bold text-[#F5F7FA]">
-                {selectedStation.name}
-              </h3>
-            </div>
-            <Badge
-              variant={
-                selectedStation.category === "Good"
-                  ? "good"
-                  : selectedStation.category === "Moderate"
-                  ? "moderate"
-                  : selectedStation.category === "Sensitive"
-                  ? "sensitive"
-                  : selectedStation.category === "Unhealthy"
-                  ? "unhealthy"
-                  : "hazardous"
-              }
-              size="md"
-            >
-              {selectedStation.category}
-            </Badge>
-          </div>
-
-          <div className="flex flex-col items-center justify-center p-6 rounded-xl bg-[#10151B] border border-white/[0.04]">
-            <div className="relative w-44 h-44 flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" stroke="currentColor" strokeWidth="8" className="text-white/[0.06]" fill="none" />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="42"
-                  stroke={selectedStation.aqi > 300 ? "#F87171" : selectedStation.aqi > 150 ? "#EF4444" : selectedStation.aqi > 100 ? "#F97316" : selectedStation.aqi > 50 ? "#F59E0B" : "#38E0B4"}
-                  strokeWidth="8"
-                  strokeDasharray="264"
-                  strokeDashoffset={Math.max(0, 264 - (Math.min(selectedStation.aqi, 400) / 400) * 264)}
-                  strokeLinecap="round"
-                  fill="none"
-                  className="transition-all duration-700 ease-out"
-                />
-              </svg>
-              <div className="absolute flex flex-col items-center text-center">
-                <span className="text-4xl font-extrabold text-[#F5F7FA] font-mono">
-                  {selectedStation.aqi}
-                </span>
-                <span className="text-[10px] font-mono text-[#A5B0BC] uppercase tracking-wider">
-                  US-AQI Index
-                </span>
-              </div>
-            </div>
-            <div className="mt-3 text-xs font-mono text-[#A5B0BC]">
-              Dominant Hazard: <strong className="text-[#F5F7FA]">{selectedStation.pm25 > 35 ? "PM2.5" : "Ozone (O3)"}</strong>
-            </div>
-          </div>
-
-          {/* Meteorological params */}
-          <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-            <div className="p-3 rounded-lg bg-[#10151B] border border-white/[0.06] flex items-center gap-2">
-              <Thermometer className="w-4 h-4 text-amber-400" />
-              <div>
-                <div className="text-[10px] text-[#6B7A8D]">Temperature</div>
-                <div className="text-sm font-bold text-[#F5F7FA]">{selectedStation.temp}°C</div>
-              </div>
-            </div>
-            <div className="p-3 rounded-lg bg-[#10151B] border border-white/[0.06] flex items-center gap-2">
-              <Droplets className="w-4 h-4 text-[#28C7F5]" />
-              <div>
-                <div className="text-[10px] text-[#6B7A8D]">Humidity</div>
-                <div className="text-sm font-bold text-[#F5F7FA]">{selectedStation.humidity}%</div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Right Column: Multi-Pollutant Diagnostics Matrix */}
-        <div className="lg:col-span-7 space-y-6">
-          <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-              <h3 className="text-sm font-bold uppercase tracking-wider font-mono text-[#F5F7FA]">
-                Chemical & Particulate Concentrations
-              </h3>
-              <span className="text-xs font-mono text-[#6B7A8D] flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" /> Updated {lastRefreshed}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
-                <div className="text-[11px] font-mono text-[#A5B0BC]">PM2.5</div>
-                <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.pm25.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">µg/m³</span>
+      {/* 4. LOCATION SEARCH & PRESET STATIONS */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-lg">
+            <div className="relative">
+              <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search Indian city, state, or station (e.g. Ahmedabad, Mumbai, New Delhi)..."
+                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted transition-colors shadow-sm"
+              />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
-                <div className="text-[10px] text-[#6B7A8D] mt-1">WHO: 15 µg/m³</div>
-              </div>
-
-              <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
-                <div className="text-[11px] font-mono text-[#A5B0BC]">PM10</div>
-                <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.pm10.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">µg/m³</span>
-                </div>
-                <div className="text-[10px] text-[#6B7A8D] mt-1">WHO: 45 µg/m³</div>
-              </div>
-
-              <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
-                <div className="text-[11px] font-mono text-[#A5B0BC]">NO2</div>
-                <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.no2.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">ppb</span>
-                </div>
-                <div className="text-[10px] text-[#6B7A8D] mt-1">Combustion gas</div>
-              </div>
-
-              <div className="p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06]">
-                <div className="text-[11px] font-mono text-[#A5B0BC]">O3</div>
-                <div className="text-xl font-bold font-mono text-[#F5F7FA] mt-1">
-                  {selectedStation.o3.toFixed(1)} <span className="text-xs font-normal text-[#A5B0BC]">ppb</span>
-                </div>
-                <div className="text-[10px] text-[#6B7A8D] mt-1">Photochemical</div>
-              </div>
+              )}
             </div>
 
-            {/* Historical Trend Graph Placeholder Skeleton */}
-            <div className="p-5 rounded-xl bg-[#10151B] border border-white/[0.06] space-y-3">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-[#F5F7FA] font-semibold flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-[#28C7F5]" /> 24-Hour Particulate Exposure Trend
-                </span>
-                <span className="text-[10px] text-[#6B7A8D]">Hourly Moving Average</span>
-              </div>
-
-              <div className="h-32 flex items-end gap-2 pt-4 px-2">
-                {[45, 60, 80, 110, 140, 180, 220, 260, 290, 312, 280, 240].map((h, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                    <div
-                      className="w-full rounded-t bg-gradient-to-t from-[#28C7F5]/20 to-[#28C7F5] transition-all"
-                      style={{ height: `${(h / 320) * 100}%` }}
-                    />
-                    <span className="text-[8px] font-mono text-[#6B7A8D]">{i * 2}h</span>
-                  </div>
+            {/* Autocomplete Dropdown */}
+            {showDropdown && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-border-subtle rounded-xl shadow-lg z-50 overflow-hidden divide-y divide-border-subtle">
+                {searchResults.map((loc, idx) => (
+                  <button
+                    key={`${loc.name}-${idx}`}
+                    onClick={() => handleSelectLocation(loc)}
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-surface-hover flex items-center justify-between text-xs transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-primary" />
+                      <span className="font-medium text-foreground">{loc.name}</span>
+                      <span className="text-foreground-muted">{loc.country}</span>
+                    </div>
+                    <span className="font-mono text-[10px] text-foreground-muted">
+                      {loc.latitude.toFixed(2)}°, {loc.longitude.toFixed(2)}°
+                    </span>
+                  </button>
                 ))}
               </div>
-              <div className="text-[10px] font-mono text-[#6B7A8D] text-center pt-1">
-                Visual analytics and time-series charting engine in Module 04
+            )}
+          </div>
+
+          {/* Preset City Quick Buttons */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {PRESET_CITIES.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => loadLocationData({ city: c.name, lat: c.lat, lon: c.lon })}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${activeCity.toLowerCase() === c.name.toLowerCase()
+                  ? "bg-primary text-white dark:text-black font-semibold shadow-sm"
+                  : "bg-surface text-foreground-secondary hover:bg-surface-hover border border-border-subtle"
+                  }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. PRIMARY TELEMETRY GAUGE & METRIC TILES */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Main AQI Status Card (Span 7) */}
+        <div className="lg:col-span-7">
+          <Card className="p-6 h-full flex flex-col justify-between space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span className="font-bold text-base text-foreground">
+                  {currentObs?.name || "Active Monitoring Station"}
+                </span>
+                <span className="text-xs text-foreground-muted">
+                  ({currentObs?.city}, {currentObs?.country})
+                </span>
               </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleToggleSaveLocation}
+                  disabled={savingLocation}
+                  className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-all ${isSaved
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
+                    : "bg-surface border-border-subtle text-foreground-muted hover:text-foreground"
+                    }`}
+                  title={isSaved ? "Saved to your monitored stations" : "Bookmark this station"}
+                >
+                  <Star className={`w-3.5 h-3.5 ${isSaved ? "fill-current" : ""}`} />
+                  <span className="text-[11px] font-medium hidden sm:inline">{isSaved ? "Saved" : "Save"}</span>
+                </button>
+
+                {currentObs && getAqiBadge(currentObs.category)}
+              </div>
+            </div>
+
+            {/* Central AQI Meter Display */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+              <div className="sm:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-background-secondary border border-border-subtle text-center">
+                <span className="text-xs font-mono text-foreground-muted uppercase tracking-wider">
+                  US EPA Standard AQI
+                </span>
+                <span
+                  className="text-6xl font-extrabold font-mono my-2"
+                  style={{ color: getAqiColor(currentObs?.aqi ?? 0) }}
+                >
+                  {isLoading ? "—" : currentObs?.aqi}
+                </span>
+                <span className="text-xs font-bold text-foreground">
+                  {currentObs?.category} Air Quality
+                </span>
+                <span className="text-[10px] font-mono text-foreground-muted mt-1">
+                  Dominant: {currentObs?.category === "Good" ? "Clean Profile" : "PM2.5 Particulates"}
+                </span>
+              </div>
+
+              <div className="sm:col-span-7 space-y-3">
+                <h4 className="text-xs font-mono uppercase tracking-wider text-foreground-muted">
+                  Atmospheric & Particulate Breakdown
+                </h4>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-lg bg-surface border border-border-subtle">
+                    <span className="text-[11px] font-mono text-foreground-muted block">PM2.5 (Fine)</span>
+                    <span className="text-sm font-bold font-mono text-foreground">{currentObs?.pm25 ?? 0} µg/m³</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-surface border border-border-subtle">
+                    <span className="text-[11px] font-mono text-foreground-muted block">PM10 (Coarse)</span>
+                    <span className="text-sm font-bold font-mono text-foreground">{currentObs?.pm10 ?? 0} µg/m³</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-surface border border-border-subtle">
+                    <span className="text-[11px] font-mono text-foreground-muted block">NO2 (Nitrogen)</span>
+                    <span className="text-sm font-bold font-mono text-foreground">{currentObs?.no2 ?? 0} µg/m³</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-surface border border-border-subtle">
+                    <span className="text-[11px] font-mono text-foreground-muted block">O3 (Ozone)</span>
+                    <span className="text-sm font-bold font-mono text-foreground">{currentObs?.o3 ?? 0} µg/m³</span>
+                  </div>
+                </div>
+
+                <div className="pt-1 flex items-center justify-between text-xs text-foreground-muted font-mono">
+                  <span className="flex items-center gap-1">
+                    <Thermometer className="w-3.5 h-3.5 text-primary" /> {currentObs?.temperature ?? 20}°C
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Droplets className="w-3.5 h-3.5 text-sky-500" /> {currentObs?.humidity ?? 50}%
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Wind className="w-3.5 h-3.5 text-teal-500" /> {currentObs?.wind_speed ?? 0} km/h
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Footer */}
+            <div className="pt-4 border-t border-border-subtle flex flex-wrap items-center justify-between text-xs font-mono text-foreground-muted">
+              <span>Source: {currentObs?.source || "Copernicus CAMS"}</span>
+              <span>Observed: {new Date(currentObs?.observed_at || Date.now()).toLocaleTimeString()}</span>
+            </div>
+          </Card>
+        </div>
+
+        {/* Gemini AI Environmental Guidance Card (Span 5) */}
+        <div className="lg:col-span-5">
+          <Card className="p-6 h-full flex flex-col justify-between space-y-5">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-600 dark:text-sky-400">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-bold text-sm text-foreground">Gemini Health Advisory</h3>
+                </div>
+                <Badge variant="cyan" size="sm">AI Grounded</Badge>
+              </div>
+
+              <p className="text-xs text-foreground-secondary leading-relaxed">
+                {recommendations?.general_guidance ||
+                  recommendations?.recommendations?.[0]?.description ||
+                  "Air quality poses minimal risk for healthy individuals. Sensitive groups should monitor for prolonged outdoor exertion."}
+              </p>
+
+              {/* Action Recommendations Grid */}
+              <div className="space-y-2 pt-2">
+                <div className="p-3 rounded-lg bg-background-secondary border border-border-subtle flex items-start gap-2.5 text-xs">
+                  <ShieldAlert className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-foreground block">Outdoor Activity Advice:</span>
+                    <span className="text-foreground-secondary">
+                      {currentObs && currentObs.aqi > 150
+                        ? "Substitute rigorous outdoor running with indoor cardiovascular routines."
+                        : "Safe for general jogging and cycling; sensitive groups monitor symptoms."}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-background-secondary border border-border-subtle flex items-start gap-2.5 text-xs">
+                  <Wind className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-foreground block">Ventilation & Filtration:</span>
+                    <span className="text-foreground-secondary">
+                      {currentObs && currentObs.aqi > 100
+                        ? "Keep windows sealed during afternoon peak haze. Run HEPA filtration if available."
+                        : "Natural ventilation is safe. Windows can remain open for ambient airflow."}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-border-subtle">
+              <Link href="/assistant" className="w-full">
+                <Button variant="secondary" size="sm" className="w-full text-xs">
+                  <Bot className="w-3.5 h-3.5 mr-1 text-primary" />
+                  Consult Gemini Pollution Assistant
+                </Button>
+              </Link>
             </div>
           </Card>
         </div>
       </div>
+
+      {/* 6. 24-HOUR TELEMETRY TIMELINE */}
+      {history.length > 0 && (
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <h3 className="font-bold text-sm text-foreground">24-Hour Observation Trend</h3>
+            </div>
+            <span className="text-xs font-mono text-foreground-muted">
+              {history.length} Hourly Samples Recorded
+            </span>
+          </div>
+
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-2 pt-2">
+            {history.slice(-12).map((pt, i) => (
+              <div
+                key={i}
+                className="p-2.5 rounded-lg bg-background-secondary border border-border-subtle text-center flex flex-col justify-between"
+              >
+                <span className="text-[10px] font-mono text-foreground-muted">
+                  {new Date(pt.observed_at).getHours()}:00
+                </span>
+                <span
+                  className="text-base font-extrabold font-mono my-1"
+                  style={{ color: getAqiColor(pt.aqi ?? 0) }}
+                >
+                  {pt.aqi}
+                </span>
+                <span className="text-[9px] font-mono text-foreground-secondary truncate">
+                  {pt.pm25} µg
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ Calculates multi-station comparisons, exposure hazard ratings, and diurnal trend
 """
 
 from typing import Any, Dict, List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.repositories.location_repository import location_repository
 from app.repositories.pollution_repository import pollution_repository
 

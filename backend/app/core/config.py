@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     BACKEND_HOST: str = "0.0.0.0"
     BACKEND_PORT: int = 8000
     API_V1_PREFIX: str = "/api/v1"
+    ENABLE_DOCS: bool = Field(default=True, description="Enable /docs and /redoc interactive documentation")
+    MAX_REQUEST_SIZE_BYTES: int = Field(default=10 * 1024 * 1024, description="Maximum request payload in bytes (10MB)")
+    RATE_LIMIT_ENABLED: bool = Field(default=True, description="Enable rate limiting on API endpoints")
+    RATE_LIMIT_REQUESTS_PER_MINUTE: int = 60
+    AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: int = 15
 
     # Security & JWT Authentication
     SECRET_KEY: str = Field(
@@ -69,23 +74,63 @@ class Settings(BaseSettings):
                 return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
 
-    # Database Configuration (PostgreSQL)
-    DATABASE_URL: str = Field(
-        default="postgresql+psycopg://postgres:postgres@localhost:5432/airwise_db",
-        description="SQLAlchemy database connection URI",
+    # Database Configuration (MongoDB)
+    MONGODB_URI: str = Field(
+        default="mongodb://localhost:27017",
+        description="MongoDB connection URI (local or MongoDB Atlas connection string)",
     )
-    DB_POOL_SIZE: int = 10
-    DB_MAX_OVERFLOW: int = 20
-    DB_POOL_TIMEOUT: int = 30
+    DB_NAME: str = Field(
+        default="airwise_db",
+        description="Primary MongoDB database name",
+    )
+    MONGODB_MAX_POOL_SIZE: int = Field(default=50, description="Max connection pool size")
+    MONGODB_MIN_POOL_SIZE: int = Field(default=10, description="Min connection pool size")
+    MONGODB_TIMEOUT_MS: int = Field(default=5000, description="Server selection timeout in ms")
+
+    # Legacy compatibility alias
+    DATABASE_URL: str = Field(
+        default="mongodb://localhost:27017/airwise_db",
+        description="Legacy database connection URI alias",
+    )
 
     # Google Gemini AI Integration
     GEMINI_API_KEY: str = Field(
         default="",
         description="Google Gemini API key (server-side only, never client-exposed)",
     )
-    GEMINI_MODEL: str = "gemini-1.5-pro"
-    GEMINI_TEMPERATURE: float = 0.3
+    GEMINI_MODEL: str = "gemini-3.5-flash"
+    GEMINI_TEMPERATURE: float = 0.4
     GEMINI_MAX_OUTPUT_TOKENS: int = 2048
+    GEMINI_TIMEOUT_SECONDS: int = 30
+
+    # AI Configuration & Safeguards
+    AI_ENABLED: bool = True
+    AI_MAX_INPUT_LENGTH: int = 5000
+    AI_MAX_HISTORY_MESSAGES: int = 20
+    AI_MAX_DAILY_REQUESTS: int = 50
+
+    # Environmental Data & Live Telemetry (Module 06)
+    ENVIRONMENTAL_DATA_ENABLED: bool = True
+    PRIMARY_AIR_QUALITY_PROVIDER: str = "open-meteo"
+    SECONDARY_AIR_QUALITY_PROVIDER: str = "waqi"
+    OPENAQ_API_KEY: str = ""
+    WAQI_API_TOKEN: str = ""
+    AIR_QUALITY_CACHE_TTL_SECONDS: int = 900
+    WEATHER_CACHE_TTL_SECONDS: int = 1800
+    ENVIRONMENTAL_API_TIMEOUT_SECONDS: int = 15
+    MAX_FRESH_DATA_AGE_MINUTES: int = 120
+
+    # Personalization, Alerts & Notifications (Module 08)
+    NOTIFICATIONS_ENABLED: bool = True
+    EMAIL_NOTIFICATIONS_ENABLED: bool = False
+    WEB_PUSH_ENABLED: bool = False
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_SUBJECT: str = "mailto:notifications@airwise.ai"
+    ALERT_EVALUATION_ENABLED: bool = True
+    ALERT_DEFAULT_COOLDOWN_MINUTES: int = 60
+    RECOMMENDATIONS_ENABLED: bool = True
+    RECOMMENDATION_CACHE_TTL_SECONDS: int = 3600
 
     @property
     def is_gemini_configured(self) -> bool:

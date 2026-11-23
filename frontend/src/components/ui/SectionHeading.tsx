@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
   badgeText?: string;
-  badgeVariant?: "cyan" | "teal" | "default";
+  badgeVariant?: "cyan" | "teal" | "default" | "good";
   title: string;
   titleHighlight?: string;
   description?: string;
@@ -14,7 +14,7 @@ interface SectionHeadingProps {
 
 export const SectionHeading: React.FC<SectionHeadingProps> = ({
   badgeText,
-  badgeVariant = "cyan",
+  badgeVariant = "teal",
   title,
   titleHighlight,
   description,
@@ -31,19 +31,19 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     >
       {badgeText && (
         <div>
-          <Badge variant={badgeVariant} size="sm" dot>
+          <Badge variant={badgeVariant === "cyan" ? "cyan" : "good"} size="sm">
             {badgeText}
           </Badge>
         </div>
       )}
-      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#F5F7FA]">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground font-sans">
         {title}{" "}
         {titleHighlight && (
-          <span className="text-gradient-cyan">{titleHighlight}</span>
+          <span className="text-primary">{titleHighlight}</span>
         )}
       </h2>
       {description && (
-        <p className="text-sm sm:text-base text-[#A5B0BC] leading-relaxed">
+        <p className="text-sm sm:text-base text-foreground-secondary leading-relaxed">
           {description}
         </p>
       )}

@@ -6,7 +6,8 @@ GET /api/v1/health/database
 
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
+from app.core.database import MongoSession as Session
 from app.core.config import settings
 from app.core.database import check_database_connection, get_db
 from app.schemas.common import SuccessResponse
@@ -65,3 +66,34 @@ async def get_database_health():
         message="Database connectivity check completed",
         data=db_info,
     )
+
+
+@router.get(
+    "/health/live",
+    status_code=status.HTTP_200_OK,
+    summary="Liveness Probe",
+    description="Lightweight liveness probe for orchestrators (Kubernetes, Docker, Cloud Run). Returns 200 if process is up.",
+)
+async def liveness_probe():
+    return {"status": "live", "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
+@router.get(
+    "/health/ready",
+    status_code=status.HTTP_200_OK,
+    summary="Readiness Probe",
+    description="Readiness probe validating that critical database dependencies are functional before routing traffic.",
+)
+async def readiness_probe():
+    db_info = check_database_connection()
+    is_ready = db_info["status"] in ["connected", "development_fallback"]
+    if not is_ready:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "status": "not_ready",
+                "reason": "Database connection unavailable",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+    return {"status": "ready", "timestamp": datetime.now(timezone.utc).isoformat()}

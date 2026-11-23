@@ -1,21 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: #080A0D;
-    --background-secondary: #10151B;
-    --background-card: #141B23;
-    --foreground: #F5F7FA;
-    --foreground-secondary: #A5B0BC;
-    --accent-cyan: #28C7F5;
-    --accent-teal: #38E0B4;
-    --border-subtle: rgba(255, 255, 255, 0.09);
+    /* ==========================================================================
+       LIGHT THEME (DEFAULT) — Environmental Intelligence Aesthetic
+       Atmospheric soft organic mist page foundation (NOT pure white #FFFFFF).
+       Crisp typography, environmental emerald & sky blue accents.
+       ========================================================================== */
+    --background: #F4F6F4;
+    --background-secondary: #EBF0EB;
+    --background-card: #FFFFFF;
+    --background-card-hover: #F8FAF8;
+    --foreground: #111827;
+    --foreground-secondary: #4B5563;
+    --foreground-muted: #6B7280;
+
+    --surface-sidebar: #ECEFEC;
+    --surface-sidebar-hover: #E1E6E1;
+    --surface-sidebar-active: #D8DFD8;
+
+    --accent-emerald: #059669;
+    --accent-emerald-hover: #047857;
+    --accent-teal: #0D9488;
+    --accent-sky: #0284C7;
+
+    --border-subtle: #E2E8E2;
+    --border-strong: #CBD5E1;
+
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  }
+
+  .dark {
+    /* ==========================================================================
+       DARK THEME — TRUE BLACK Foundation (#000000)
+       Secondary surfaces in deep obsidian/charcoal (#0A0D0B, #121714).
+       Restrained environmental emerald & atmospheric cyan accents, no neon glare.
+       ========================================================================== */
+    --background: #000000;
+    --background-secondary: #0A0D0B;
+    --background-card: #0A0D0B;
+    --background-card-hover: #121714;
+    --foreground: #F9FAFB;
+    --foreground-secondary: #9CA3AF;
+    --foreground-muted: #6B7280;
+
+    --surface-sidebar: #050706;
+    --surface-sidebar-hover: #111713;
+    --surface-sidebar-active: #17201A;
+
+    --accent-emerald: #10B981;
+    --accent-emerald-hover: #34D399;
+    --accent-teal: #14B8A6;
+    --accent-sky: #38BDF8;
+
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   }
 
   * {
-    border-color: rgba(255, 255, 255, 0.09);
+    border-color: var(--border-subtle);
   }
 
   html {
@@ -27,6 +76,7 @@
     color: var(--foreground);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
@@ -35,44 +85,58 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #080A0D;
+  background: var(--background);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #19222D;
+  background: var(--border-strong);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #28C7F5;
+  background: var(--accent-emerald);
 }
 
-/* Glassmorphism Utilities */
-.glass-panel {
-  background: rgba(20, 27, 35, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+/* Environmental Themed Surface Utilities */
+.surface-card {
+  background-color: var(--background-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s ease;
 }
 
-.glass-panel-hover {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+.surface-card-hover:hover {
+  background-color: var(--background-card-hover);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
 
-.glass-panel-hover:hover {
-  background: rgba(25, 34, 45, 0.85);
-  border-color: rgba(40, 199, 245, 0.35);
-  box-shadow: 0 10px 30px -10px rgba(40, 199, 245, 0.15);
-  transform: translateY(-2px);
-}
-
-.text-gradient-cyan {
-  background: linear-gradient(135deg, #F5F7FA 20%, #28C7F5 80%, #38E0B4 100%);
+.text-gradient-emerald {
+  background: linear-gradient(135deg, var(--foreground) 30%, var(--accent-emerald) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-teal {
-  background: linear-gradient(135deg, #28C7F5 0%, #38E0B4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Minimalist High-End Typography */
+body {
+  font-family: 'Plus Jakarta Sans', var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* High-Contrast Zero-API-Key OpenStreetMap Dark Mode Styling */
+.dark .leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(88%);
+}
+
+.dark .leaflet-container {
+  background: #000000 !important;
+}
+
+.leaflet-container {
+  background: #F4F6F4 !important;
+  font-family: inherit;
 }

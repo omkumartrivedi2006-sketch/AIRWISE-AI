@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { Search, MessageSquareCode, ShieldCheck, ArrowRight } from "lucide-react";
+import { Search, Cpu, ShieldCheck, ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Card } from "@/components/ui/Card";
 
@@ -15,92 +17,82 @@ interface StepItem {
 const STEPS: StepItem[] = [
   {
     number: "01",
-    title: "Explore",
-    subtitle: "Real-Time Telemetry Discovery",
-    description: "Understand available pollution and environmental information. Access standardized AQI readings, particulate concentrations (PM2.5, PM10), and atmospheric trends.",
+    title: "Detect & Locate",
+    subtitle: "Ground & Satellite Data Fusion",
+    description: "Provide your live location or search any global city. AIRWISE AI connects to the nearest monitoring stations and Copernicus CAMS models to fetch live PM2.5, PM10, and gaseous concentrations.",
     icon: Search,
-    deliverable: "Standardized multi-pollutant telemetry & EPA risk tiers",
+    deliverable: "Instant hyperlocal pollutant measurements",
   },
   {
     number: "02",
-    title: "Ask",
-    subtitle: "Contextual AI Interaction",
-    description: "Interact with AIRWISE AI to ask questions and understand environmental conditions. Receive natural-language explanations contextualized by local conditions and personal health profiles.",
-    icon: MessageSquareCode,
-    deliverable: "Server-side Gemini reasoning with WHO health standards",
+    title: "Analyze & Interpret",
+    subtitle: "AI Contextual Engine",
+    description: "Raw particulate data is normalized into standard US EPA and WHO 2021 air quality categories. Google Gemini analyzes atmospheric trends against your personalized health vulnerability profile.",
+    icon: Cpu,
+    deliverable: "Clear health risk level & pollutant breakdown",
   },
   {
     number: "03",
-    title: "Act",
-    subtitle: "Informed Decision Execution",
-    description: "Use relevant insights and recommendations to make informed decisions. Optimize workout scheduling, apartment ventilation, purifier usage, and commute timing.",
+    title: "Protect & Act",
+    subtitle: "Actionable Daily Decisions",
+    description: "Receive practical recommendations: best outdoor exercise hours, optimal window ventilation times, N95 respirator mask advice, and smart notification triggers when conditions shift.",
     icon: ShieldCheck,
-    deliverable: "Actionable protective measures & reduced exposure risk",
+    deliverable: "Proactive exposure reduction & peace of mind",
   },
 ];
 
 export const HowItWorksSection: React.FC = () => {
   return (
-    <section id="how-it-works" className="py-16 space-y-12 scroll-mt-20">
+    <section id="how-it-works" className="py-12 sm:py-16 space-y-12">
       <SectionHeading
-        badgeText="SECTION E • THREE-STEP LIFECYCLE"
-        badgeVariant="cyan"
+        badgeText="THREE-STEP WORKFLOW"
+        badgeVariant="teal"
         title="How AIRWISE AI"
-        titleHighlight="Works in Practice"
-        description="A transparent three-step process translating complex atmospheric sensor data into clear personal health actions."
+        titleHighlight="Protects You"
+        description="A streamlined process translating complex atmospheric sensor telemetry into immediate, practical health actions."
       />
 
-      <div className="max-w-6xl mx-auto">
-        {/* Desktop Horizontal Timeline & Mobile Vertical Stack */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-          {STEPS.map((step, idx) => {
-            const IconComponent = step.icon;
-            return (
-              <div key={step.number} className="relative flex flex-col">
-                <Card className="p-6 h-full flex flex-col justify-between bg-[#141B23] space-y-4 hover:border-[#28C7F5]/40 transition-all">
-                  <div className="space-y-4">
-                    {/* Step Number & Icon Header */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-3xl font-extrabold font-mono text-[#28C7F5]/40 tracking-tight">
-                        {step.number}
-                      </span>
-                      <div className="w-10 h-10 rounded-lg bg-[#10151B] border border-white/[0.09] flex items-center justify-center text-[#38E0B4]">
-                        <IconComponent className="w-5 h-5" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="text-xs font-mono uppercase tracking-wider text-[#38E0B4] font-semibold">
-                        Step {step.number}
-                      </div>
-                      <h3 className="text-xl font-bold text-[#F5F7FA] mt-0.5">
-                        {step.title}
-                      </h3>
-                      <div className="text-xs font-mono text-[#A5B0BC] mt-0.5">
-                        {step.subtitle}
-                      </div>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-[#A5B0BC] leading-relaxed">
-                      {step.description}
-                    </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {STEPS.map((step) => {
+          const IconComponent = step.icon;
+          return (
+            <Card
+              key={step.number}
+              className="p-6 flex flex-col justify-between space-y-5 hover:border-primary/40 transition-all group"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl font-extrabold font-mono text-primary/40 group-hover:text-primary transition-colors">
+                    {step.number}
+                  </span>
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                    <IconComponent className="w-5 h-5" />
                   </div>
+                </div>
 
-                  <div className="pt-3 border-t border-white/[0.06] text-[11px] font-mono text-[#6B7A8D]">
-                    <strong className="text-[#F5F7FA]">Outcome:</strong> {step.deliverable}
-                  </div>
-                </Card>
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {step.title}
+                  </h3>
+                  <span className="text-xs font-mono text-foreground-muted block mt-0.5">
+                    {step.subtitle}
+                  </span>
+                </div>
 
-                {/* Desktop Connector Arrow between steps */}
-                {idx < STEPS.length - 1 && (
-                  <div className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-[#10151B] border border-white/[0.12] items-center justify-center text-[#28C7F5]">
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                )}
+                <p className="text-xs sm:text-sm text-foreground-secondary leading-relaxed">
+                  {step.description}
+                </p>
               </div>
-            );
-          })}
-        </div>
+
+              <div className="pt-4 border-t border-border-subtle">
+                <div className="text-[11px] font-mono text-foreground-muted flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span>{step.deliverable}</span>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </section>
   );

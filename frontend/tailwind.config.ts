@@ -11,40 +11,46 @@ const config: Config = {
     extend: {
       colors: {
         background: {
-          DEFAULT: "#080A0D",
-          secondary: "#10151B",
-          card: "#141B23",
-          cardHover: "#19222D",
+          DEFAULT: "var(--background)",
+          secondary: "var(--background-secondary)",
+          card: "var(--background-card)",
+          cardHover: "var(--background-card-hover)",
         },
         surface: {
-          DEFAULT: "#10151B",
-          card: "#141B23",
-          hover: "#19222D",
-          border: "rgba(255, 255, 255, 0.09)",
-          glass: "rgba(20, 27, 35, 0.75)",
+          DEFAULT: "var(--background-card)",
+          card: "var(--background-card)",
+          hover: "var(--background-card-hover)",
+          border: "var(--border-subtle)",
+          sidebar: "var(--surface-sidebar)",
+          sidebarHover: "var(--surface-sidebar-hover)",
+          sidebarActive: "var(--surface-sidebar-active)",
         },
         primary: {
-          DEFAULT: "#28C7F5",
-          hover: "#1AAAD5",
-          glow: "rgba(40, 199, 245, 0.25)",
+          DEFAULT: "var(--accent-emerald)",
+          hover: "var(--accent-emerald-hover)",
+          glow: "rgba(16, 185, 129, 0.20)",
         },
         accent: {
-          cyan: "#28C7F5",
-          teal: "#38E0B4",
-          blue: "#1E70F5",
+          emerald: "var(--accent-emerald)",
+          teal: "var(--accent-teal)",
+          sky: "var(--accent-sky)",
         },
         foreground: {
-          DEFAULT: "#F5F7FA",
-          secondary: "#A5B0BC",
-          muted: "#6B7A8D",
+          DEFAULT: "var(--foreground)",
+          secondary: "var(--foreground-secondary)",
+          muted: "var(--foreground-muted)",
+        },
+        border: {
+          subtle: "var(--border-subtle)",
+          strong: "var(--border-strong)",
         },
         aqi: {
-          good: "#38E0B4",
-          moderate: "#F59E0B",
-          unhealthySensitive: "#F97316",
-          unhealthy: "#EF4444",
-          veryUnhealthy: "#C084FC",
-          hazardous: "#F87171",
+          good: "#10B981",              // Emerald Green
+          moderate: "#F59E0B",          // Amber Yellow
+          unhealthySensitive: "#F97316",// Vivid Orange
+          unhealthy: "#EF4444",         // Strong Red
+          veryUnhealthy: "#8B5CF6",     // Violet Purple
+          hazardous: "#DC2626",         // Dark Crimson
         },
       },
       fontFamily: {
@@ -65,9 +71,9 @@ const config: Config = {
         ],
       },
       boxShadow: {
-        card: "0 4px 20px -2px rgba(0, 0, 0, 0.5)",
-        "cyan-glow": "0 0 25px -5px rgba(40, 199, 245, 0.25)",
-        "teal-glow": "0 0 25px -5px rgba(56, 224, 180, 0.25)",
+        card: "var(--card-shadow)",
+        "emerald-glow": "0 0 20px -3px rgba(16, 185, 129, 0.25)",
+        "sky-glow": "0 0 20px -3px rgba(56, 189, 248, 0.25)",
       },
       animation: {
         "pulse-subtle": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",

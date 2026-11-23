@@ -1,27 +1,19 @@
 """
-AIRWISE AI — Password Reset Token Model
+AIRWISE AI — Password Reset Token Model (MongoDB Document)
 Stores secure SHA-256 hashes of single-use password reset tokens with short expiration.
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from app.models.base import Base
+from app.models.base import Base, Column, DateTime, Integer, String
 
 
 class PasswordResetToken(Base):
     __tablename__ = "password_reset_tokens"
+    __collection__ = "password_reset_tokens"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    token_hash = Column(String(64), unique=True, index=True, nullable=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False, index=True)
-    used_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        nullable=False,
-    )
-
-    # Relationships
-    user = relationship("User", back_populates="password_reset_tokens")
+    id = Column(name="id", type_hint=int, autoincrement=True)
+    user_id = Column(name="user_id", type_hint=int, index=True)
+    token_hash = Column(name="token_hash", type_hint=str, unique=True, index=True)
+    expires_at = Column(name="expires_at", type_hint=datetime, index=True)
+    used_at = Column(name="used_at", type_hint=datetime, default=None)
+    created_at = Column(name="created_at", type_hint=datetime, default=lambda: datetime.now(timezone.utc))

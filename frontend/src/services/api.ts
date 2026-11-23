@@ -11,6 +11,18 @@ import {
   LocationItem,
   PollutionObservationItem,
   PollutionSummaryData,
+  LocationSearchResult,
+  HistoricalObservationPoint,
+  EnvironmentalDataStatus,
+  AnalyticsOverviewResponse,
+  AQITrendsResponse,
+  PollutantTrendsResponse,
+  StatisticsData,
+  LocationComparisonResponse,
+  DataCoverageResponse,
+  MapObservationPoint,
+  AIInsightRequest,
+  AIInsightResponse,
   ConversationItem,
   MessageItem,
   FeedbackSubmission,
@@ -83,11 +95,15 @@ export class ApiClient {
   // ==========================================
   // Authentication & Session Management (Module 04)
   // ==========================================
-  public static async register(data: RegisterPayload): Promise<ApiResponse<User>> {
-    return this.request<User>("/auth/register", {
+  public static async register(data: RegisterPayload): Promise<ApiResponse<TokenResponseData>> {
+    const res = await this.request<TokenResponseData>("/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });
+    if (res.success && res.data?.access_token) {
+      this.setAccessToken(res.data.access_token);
+    }
+    return res;
   }
 
   public static async login(data: LoginPayload): Promise<ApiResponse<TokenResponseData>> {
@@ -255,6 +271,69 @@ export class ApiClient {
   }
 
   // ==========================================
+  // Live Environmental Data Integration (Module 06)
+  // ==========================================
+  public static async getLatestPollutionForLocation(params: {
+    city?: string;
+    location_id?: number;
+    lat?: number;
+    lon?: number;
+    refresh?: boolean;
+  }): Promise<ApiResponse<PollutionObservationItem>> {
+    const query = new URLSearchParams();
+    if (params.city) query.append("city", params.city);
+    if (params.location_id) query.append("location_id", params.location_id.toString());
+    if (params.lat !== undefined) query.append("lat", params.lat.toString());
+    if (params.lon !== undefined) query.append("lon", params.lon.toString());
+    if (params.refresh) query.append("refresh", "true");
+
+    return this.request<PollutionObservationItem>(`/pollution/latest?${query.toString()}`);
+  }
+
+  public static async searchLocations(query: string, limit = 5): Promise<ApiResponse<LocationSearchResult[]>> {
+    return this.request<LocationSearchResult[]>(
+      `/pollution/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+  }
+
+  public static async getPollutionHistory(params: {
+    city?: string;
+    location_id?: number;
+    lat?: number;
+    lon?: number;
+    hours?: number;
+  }): Promise<ApiResponse<HistoricalObservationPoint[]>> {
+    const query = new URLSearchParams();
+    if (params.city) query.append("city", params.city);
+    if (params.location_id) query.append("location_id", params.location_id.toString());
+    if (params.lat !== undefined) query.append("lat", params.lat.toString());
+    if (params.lon !== undefined) query.append("lon", params.lon.toString());
+    if (params.hours) query.append("hours", params.hours.toString());
+
+    return this.request<HistoricalObservationPoint[]>(`/pollution/history?${query.toString()}`);
+  }
+
+  public static async getPollutionSources(): Promise<ApiResponse<Array<{
+    name: string;
+    is_primary: boolean;
+    is_configured: boolean;
+    status: string;
+    details?: string;
+  }>>> {
+    return this.request<Array<{
+      name: string;
+      is_primary: boolean;
+      is_configured: boolean;
+      status: string;
+      details?: string;
+    }>>("/pollution/sources");
+  }
+
+  public static async getPollutionDataStatus(): Promise<ApiResponse<EnvironmentalDataStatus>> {
+    return this.request<EnvironmentalDataStatus>("/pollution/data-status");
+  }
+
+  // ==========================================
   // Conversations & Dialogue Sessions
   // ==========================================
   public static async getConversations(userId?: number, page = 1, limit = 20): Promise<ApiResponse<ConversationItem[]>> {
@@ -280,7 +359,7 @@ export class ApiClient {
   }
 
   // ==========================================
-  // Messages
+  // Messages & AI Chat (Module 05)
   // ==========================================
   public static async getMessages(conversationId: number, page = 1, limit = 50): Promise<ApiResponse<MessageItem[]>> {
     return this.request<MessageItem[]>(`/conversations/${conversationId}/messages?page=${page}&limit=${limit}`);
@@ -296,6 +375,21 @@ export class ApiClient {
     });
   }
 
+  public static async sendChatMessage(
+    conversationId: number,
+    content: string,
+    locationId?: number
+  ): Promise<ApiResponse<import("@/types").ChatMessageResponse>> {
+    return this.request<import("@/types").ChatMessageResponse>(`/conversations/${conversationId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content, location_id: locationId }),
+    });
+  }
+
+  public static async getAIStatus(): Promise<ApiResponse<import("@/types").AIProviderStatusResponse>> {
+    return this.request<import("@/types").AIProviderStatusResponse>("/ai/status");
+  }
+
   // ==========================================
   // Feedback
   // ==========================================
@@ -307,12 +401,528 @@ export class ApiClient {
   }
 
   // ==========================================
-  // AI Query (Module 01 Foundation)
+  // AI Query (Module 01 Foundation & Preview)
   // ==========================================
-  public static async queryAI(payload: AIQueryRequest): Promise<ApiResponse<AIQueryResponse>> {
-    return this.request<AIQueryResponse>("/ai/query", {
+  public static async queryAI(data: {
+    prompt: string;
+    context?: Record<string, unknown>;
+  }): Promise<ApiResponse<{ response: string }>> {
+    return this.request<{ response: string }>("/ai/query", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(data),
     });
+  }
+
+  // ==========================================
+  // Environmental Analytics & Visualizations (Module 07)
+  // ==========================================
+  public static async getAnalyticsOverview(params?: {
+    location_id?: number;
+    city?: string;
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<ApiResponse<AnalyticsOverviewResponse>> {
+    const q = new URLSearchParams();
+    if (params?.location_id) q.append("location_id", params.location_id.toString());
+    if (params?.city) q.append("city", params.city);
+    if (params?.time_range) q.append("time_range", params.time_range);
+    if (params?.start_date) q.append("start_date", params.start_date);
+    if (params?.end_date) q.append("end_date", params.end_date);
+    return this.request<AnalyticsOverviewResponse>(`/analytics/overview?${q.toString()}`);
+  }
+
+  public static async getAqiTrends(params?: {
+    location_id?: number;
+    city?: string;
+    interval?: string;
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<ApiResponse<AQITrendsResponse>> {
+    const q = new URLSearchParams();
+    if (params?.location_id) q.append("location_id", params.location_id.toString());
+    if (params?.city) q.append("city", params.city);
+    if (params?.interval) q.append("interval", params.interval);
+    if (params?.time_range) q.append("time_range", params.time_range);
+    if (params?.start_date) q.append("start_date", params.start_date);
+    if (params?.end_date) q.append("end_date", params.end_date);
+    return this.request<AQITrendsResponse>(`/analytics/aqi-trends?${q.toString()}`);
+  }
+
+  public static async getPollutantTrends(params: {
+    pollutant: string;
+    location_id?: number;
+    city?: string;
+    interval?: string;
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<ApiResponse<PollutantTrendsResponse>> {
+    const q = new URLSearchParams({ pollutant: params.pollutant });
+    if (params.location_id) q.append("location_id", params.location_id.toString());
+    if (params.city) q.append("city", params.city);
+    if (params.interval) q.append("interval", params.interval);
+    if (params.time_range) q.append("time_range", params.time_range);
+    if (params.start_date) q.append("start_date", params.start_date);
+    if (params.end_date) q.append("end_date", params.end_date);
+    return this.request<PollutantTrendsResponse>(`/analytics/pollutant-trends?${q.toString()}`);
+  }
+
+  public static async getStatistics(params?: {
+    metric?: string;
+    location_id?: number;
+    city?: string;
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<ApiResponse<StatisticsData>> {
+    const q = new URLSearchParams();
+    if (params?.metric) q.append("metric", params.metric);
+    if (params?.location_id) q.append("location_id", params.location_id.toString());
+    if (params?.city) q.append("city", params.city);
+    if (params?.time_range) q.append("time_range", params.time_range);
+    if (params?.start_date) q.append("start_date", params.start_date);
+    if (params?.end_date) q.append("end_date", params.end_date);
+    return this.request<StatisticsData>(`/analytics/statistics?${q.toString()}`);
+  }
+
+  public static async compareLocations(params: {
+    metric?: string;
+    location_ids?: number[];
+    cities?: string[];
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<ApiResponse<LocationComparisonResponse>> {
+    const q = new URLSearchParams();
+    if (params.metric) q.append("metric", params.metric);
+    if (params.time_range) q.append("time_range", params.time_range);
+    if (params.start_date) q.append("start_date", params.start_date);
+    if (params.end_date) q.append("end_date", params.end_date);
+    if (params.location_ids) {
+      params.location_ids.forEach((id) => q.append("location_ids", id.toString()));
+    }
+    if (params.cities) {
+      params.cities.forEach((c) => q.append("cities", c));
+    }
+    return this.request<LocationComparisonResponse>(`/analytics/compare?${q.toString()}`);
+  }
+
+  public static async getDataCoverage(params?: {
+    location_id?: number;
+    city?: string;
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<ApiResponse<DataCoverageResponse>> {
+    const q = new URLSearchParams();
+    if (params?.location_id) q.append("location_id", params.location_id.toString());
+    if (params?.city) q.append("city", params.city);
+    if (params?.time_range) q.append("time_range", params.time_range);
+    if (params?.start_date) q.append("start_date", params.start_date);
+    if (params?.end_date) q.append("end_date", params.end_date);
+    return this.request<DataCoverageResponse>(`/analytics/data-coverage?${q.toString()}`);
+  }
+
+  public static async generateAiInsight(data: AIInsightRequest): Promise<ApiResponse<AIInsightResponse>> {
+    return this.request<AIInsightResponse>("/analytics/insights", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async downloadCsvExport(params?: {
+    location_id?: number;
+    city?: string;
+    time_range?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<string> {
+    const q = new URLSearchParams();
+    if (params?.location_id) q.append("location_id", params.location_id.toString());
+    if (params?.city) q.append("city", params.city);
+    if (params?.time_range) q.append("time_range", params.time_range);
+    if (params?.start_date) q.append("start_date", params.start_date);
+    if (params?.end_date) q.append("end_date", params.end_date);
+
+    const url = `${API_BASE_URL}/analytics/export/csv?${q.toString()}`;
+    const headers: Record<string, string> = {
+      ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
+    };
+    const res = await fetch(url, { headers, credentials: "include" });
+    if (!res.ok) throw new Error("Failed to export analytics CSV");
+    return res.text();
+  }
+
+  // ==========================================
+  // Geospatial Map (Module 07)
+  // ==========================================
+  public static async getMapObservations(): Promise<ApiResponse<MapObservationPoint[]>> {
+    return this.request<MapObservationPoint[]>("/map/observations");
+  }
+
+  public static async getMapLocations(): Promise<ApiResponse<LocationItem[]>> {
+    return this.request<LocationItem[]>("/map/locations");
+  }
+
+  // ==========================================
+  // Personalization, Alerts & Notifications (Module 08)
+  // ==========================================
+
+  // Preferences
+  public static async getMyPreferences(): Promise<ApiResponse<import("@/types").UserPreferences>> {
+    return this.request<import("@/types").UserPreferences>("/users/me/preferences");
+  }
+
+  public static async updateMyPreferences(
+    data: import("@/types").UserPreferencesUpdatePayload
+  ): Promise<ApiResponse<import("@/types").UserPreferences>> {
+    return this.request<import("@/types").UserPreferences>("/users/me/preferences", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Saved Locations
+  public static async getSavedLocations(): Promise<ApiResponse<import("@/types").SavedLocation[]>> {
+    return this.request<import("@/types").SavedLocation[]>("/users/me/locations");
+  }
+
+  public static async addSavedLocation(
+    data: import("@/types").SavedLocationCreatePayload
+  ): Promise<ApiResponse<import("@/types").SavedLocation>> {
+    return this.request<import("@/types").SavedLocation>("/users/me/locations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async updateSavedLocation(
+    savedLocationId: number,
+    data: import("@/types").SavedLocationUpdatePayload
+  ): Promise<ApiResponse<import("@/types").SavedLocation>> {
+    return this.request<import("@/types").SavedLocation>(`/users/me/locations/${savedLocationId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async deleteSavedLocation(savedLocationId: number): Promise<ApiResponse<{ deleted_id: number }>> {
+    return this.request<{ deleted_id: number }>(`/users/me/locations/${savedLocationId}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Alert Rules
+  public static async getAlertRules(): Promise<ApiResponse<import("@/types").AlertRule[]>> {
+    return this.request<import("@/types").AlertRule[]>("/alerts/rules");
+  }
+
+  public static async createAlertRule(
+    data: import("@/types").AlertRuleCreatePayload
+  ): Promise<ApiResponse<import("@/types").AlertRule>> {
+    return this.request<import("@/types").AlertRule>("/alerts/rules", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async updateAlertRule(
+    ruleId: number,
+    data: import("@/types").AlertRuleUpdatePayload
+  ): Promise<ApiResponse<import("@/types").AlertRule>> {
+    return this.request<import("@/types").AlertRule>(`/alerts/rules/${ruleId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async deleteAlertRule(ruleId: number): Promise<ApiResponse<{ deleted_id: number }>> {
+    return this.request<{ deleted_id: number }>(`/alerts/rules/${ruleId}`, {
+      method: "DELETE",
+    });
+  }
+
+  public static async evaluateAlerts(locationId: number): Promise<ApiResponse<{ triggered_count: number; location_id: number }>> {
+    return this.request<{ triggered_count: number; location_id: number }>(`/alerts/evaluate?location_id=${locationId}`, {
+      method: "POST",
+    });
+  }
+
+  // Notifications
+  public static async getNotifications(params?: {
+    is_read?: boolean;
+    notification_type?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<import("@/types").NotificationItem[]>> {
+    const q = new URLSearchParams();
+    if (params?.is_read !== undefined) q.append("is_read", params.is_read.toString());
+    if (params?.notification_type) q.append("notification_type", params.notification_type);
+    if (params?.page) q.append("page", params.page.toString());
+    if (params?.limit) q.append("limit", params.limit.toString());
+
+    return this.request<import("@/types").NotificationItem[]>(`/notifications?${q.toString()}`);
+  }
+
+  public static async getUnreadNotificationCount(): Promise<ApiResponse<{ unread_count: number }>> {
+    return this.request<{ unread_count: number }>("/notifications/unread-count");
+  }
+
+  public static async markNotificationRead(notificationId: number): Promise<ApiResponse<import("@/types").NotificationItem>> {
+    return this.request<import("@/types").NotificationItem>(`/notifications/${notificationId}/read`, {
+      method: "PATCH",
+    });
+  }
+
+  public static async markAllNotificationsRead(): Promise<ApiResponse<{ updated_count: number }>> {
+    return this.request<{ updated_count: number }>("/notifications/mark-all-read", {
+      method: "POST",
+    });
+  }
+
+  public static async deleteNotification(notificationId: number): Promise<ApiResponse<{ deleted_id: number }>> {
+    return this.request<{ deleted_id: number }>(`/notifications/${notificationId}`, {
+      method: "DELETE",
+    });
+  }
+
+  public static async subscribeWebPush(data: {
+    endpoint: string;
+    p256dh_key: string;
+    auth_key: string;
+    user_agent?: string;
+  }): Promise<ApiResponse<{ status: string }>> {
+    return this.request<{ status: string }>("/notifications/push/subscribe", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async unsubscribeWebPush(): Promise<ApiResponse<{ status: string }>> {
+    return this.request<{ status: string }>("/notifications/push/subscribe", {
+      method: "DELETE",
+    });
+  }
+
+  // Recommendations
+  public static async getPersonalizedRecommendations(
+    locationId?: number
+  ): Promise<ApiResponse<import("@/types").RecommendationsResponse>> {
+    const qs = locationId ? `?location_id=${locationId}` : "";
+    return this.request<import("@/types").RecommendationsResponse>(`/recommendations${qs}`);
+  }
+
+  public static async refreshPersonalizedRecommendations(
+    locationId?: number
+  ): Promise<ApiResponse<import("@/types").RecommendationsResponse>> {
+    const qs = locationId ? `?location_id=${locationId}` : "";
+    return this.request<import("@/types").RecommendationsResponse>(`/recommendations/refresh${qs}`, {
+      method: "POST",
+    });
+  }
+
+  // Compatibility aliases for Dashboard and Telemetry
+  public static async getRecommendations(locationId?: number): Promise<ApiResponse<import("@/types").RecommendationsResponse>> {
+    return this.getPersonalizedRecommendations(locationId);
+  }
+
+  public static async saveLocation(data: import("@/types").SavedLocationCreatePayload): Promise<ApiResponse<import("@/types").SavedLocation>> {
+    return this.addSavedLocation(data);
+  }
+
+  public static async getPollutionObservation(params: {
+    city?: string;
+    location_id?: number;
+    lat?: number;
+    lon?: number;
+    force_refresh?: boolean;
+  }): Promise<ApiResponse<import("@/types").PollutionObservationItem>> {
+    return this.getLatestPollutionForLocation({
+      city: params.city,
+      location_id: params.location_id,
+      lat: params.lat,
+      lon: params.lon,
+      refresh: params.force_refresh,
+    });
+  }
+
+  public static async getHistoricalObservations(params: {
+    city?: string;
+    location_id?: number;
+    lat?: number;
+    lon?: number;
+    limit?: number;
+  }): Promise<ApiResponse<import("@/types").HistoricalObservationPoint[]>> {
+    return this.getPollutionHistory({
+      city: params.city,
+      location_id: params.location_id,
+      lat: params.lat,
+      lon: params.lon,
+      hours: params.limit,
+    });
+  }
+
+  // ==========================================
+  // Platform Administration (Module 09)
+  // ==========================================
+
+  public static async getAdminOverview(): Promise<ApiResponse<import("@/types").AdminDashboardOverview>> {
+    return this.request<import("@/types").AdminDashboardOverview>("/admin/dashboard/overview");
+  }
+
+  public static async getAdminActivity(days = 7): Promise<ApiResponse<import("@/types").AdminActivityMetrics>> {
+    return this.request<import("@/types").AdminActivityMetrics>(`/admin/dashboard/activity?days=${days}`);
+  }
+
+  public static async getAdminUsers(params?: {
+    query?: string;
+    role?: string;
+    is_active?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<import("@/types").AdminUser[]>> {
+    const q = new URLSearchParams();
+    if (params?.query) q.append("query", params.query);
+    if (params?.role) q.append("role", params.role);
+    if (params?.is_active !== undefined) q.append("is_active", String(params.is_active));
+    if (params?.page) q.append("page", params.page.toString());
+    if (params?.limit) q.append("limit", params.limit.toString());
+    return this.request<import("@/types").AdminUser[]>(`/admin/users?${q.toString()}`);
+  }
+
+  public static async getAdminUser(userId: number): Promise<ApiResponse<import("@/types").AdminUser>> {
+    return this.request<import("@/types").AdminUser>(`/admin/users/${userId}`);
+  }
+
+  public static async updateAdminUserStatus(
+    userId: number,
+    is_active: boolean,
+    reason?: string
+  ): Promise<ApiResponse<import("@/types").AdminUser>> {
+    return this.request<import("@/types").AdminUser>(`/admin/users/${userId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ is_active, reason }),
+    });
+  }
+
+  public static async updateAdminUserRole(
+    userId: number,
+    role: string,
+    reason?: string
+  ): Promise<ApiResponse<import("@/types").AdminUser>> {
+    return this.request<import("@/types").AdminUser>(`/admin/users/${userId}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role, reason }),
+    });
+  }
+
+  public static async getAdminEnvironmentalData(params?: {
+    query?: string;
+    location_id?: number;
+    review_status?: string;
+    is_flagged?: boolean;
+    is_demo?: boolean;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<import("@/types").AdminObservation[]>> {
+    const q = new URLSearchParams();
+    if (params?.query) q.append("query", params.query);
+    if (params?.location_id) q.append("location_id", params.location_id.toString());
+    if (params?.review_status) q.append("review_status", params.review_status);
+    if (params?.is_flagged !== undefined) q.append("is_flagged", String(params.is_flagged));
+    if (params?.is_demo !== undefined) q.append("is_demo", String(params.is_demo));
+    if (params?.page) q.append("page", params.page.toString());
+    if (params?.limit) q.append("limit", params.limit.toString());
+    return this.request<import("@/types").AdminObservation[]>(`/admin/environmental-data?${q.toString()}`);
+  }
+
+  public static async getAdminObservation(
+    observationId: number
+  ): Promise<ApiResponse<import("@/types").AdminObservation>> {
+    return this.request<import("@/types").AdminObservation>(`/admin/environmental-data/${observationId}`);
+  }
+
+  public static async reviewAdminObservation(
+    observationId: number,
+    review_status: string,
+    reason: string
+  ): Promise<ApiResponse<import("@/types").AdminObservation>> {
+    return this.request<import("@/types").AdminObservation>(`/admin/environmental-data/${observationId}/review`, {
+      method: "PATCH",
+      body: JSON.stringify({ review_status, reason }),
+    });
+  }
+
+  public static async getAdminDataSources(): Promise<ApiResponse<import("@/types").AdminDataSource[]>> {
+    return this.request<import("@/types").AdminDataSource[]>("/admin/data-sources");
+  }
+
+  public static async pingAdminDataSource(
+    sourceId: string
+  ): Promise<ApiResponse<import("@/types").AdminDataSourceHealth>> {
+    return this.request<import("@/types").AdminDataSourceHealth>(`/admin/data-sources/${sourceId}/health`);
+  }
+
+  public static async getAdminAiUsage(): Promise<ApiResponse<import("@/types").AdminAiUsageOverview>> {
+    return this.request<import("@/types").AdminAiUsageOverview>("/admin/ai-usage/overview");
+  }
+
+  public static async getAdminAiTrends(
+    days = 7
+  ): Promise<ApiResponse<import("@/types").AdminAiUsageTrends>> {
+    return this.request<import("@/types").AdminAiUsageTrends>(`/admin/ai-usage/trends?days=${days}`);
+  }
+
+  public static async getAdminNotifications(params?: {
+    delivery_status?: string;
+    severity?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<import("@/types").AdminNotification[]>> {
+    const q = new URLSearchParams();
+    if (params?.delivery_status) q.append("delivery_status", params.delivery_status);
+    if (params?.severity) q.append("severity", params.severity);
+    if (params?.page) q.append("page", params.page.toString());
+    if (params?.limit) q.append("limit", params.limit.toString());
+    return this.request<import("@/types").AdminNotification[]>(`/admin/notifications?${q.toString()}`);
+  }
+
+  public static async getAdminNotificationMetrics(): Promise<ApiResponse<import("@/types").AdminNotificationMetrics>> {
+    return this.request<import("@/types").AdminNotificationMetrics>("/admin/notifications/metrics");
+  }
+
+  public static async retryAdminNotification(
+    notificationId: number
+  ): Promise<ApiResponse<{ notification_id: number; delivery_status: string; message: string; retry_count: number }>> {
+    return this.request<{ notification_id: number; delivery_status: string; message: string; retry_count: number }>(
+      `/admin/notifications/${notificationId}/retry`,
+      { method: "POST" }
+    );
+  }
+
+  public static async getAdminSystemHealth(): Promise<ApiResponse<import("@/types").AdminSystemHealth>> {
+    return this.request<import("@/types").AdminSystemHealth>("/admin/system/health");
+  }
+
+  public static async getAdminDatabaseHealth(): Promise<ApiResponse<import("@/types").AdminDatabaseHealth>> {
+    return this.request<import("@/types").AdminDatabaseHealth>("/admin/system/database");
+  }
+
+  public static async getAdminAuditLogs(params?: {
+    action?: string;
+    target_type?: string;
+    admin_id?: number;
+    page?: number;
+    limit?: number;
+  }): Promise<ApiResponse<import("@/types").AdminAuditLog[]>> {
+    const q = new URLSearchParams();
+    if (params?.action) q.append("action", params.action);
+    if (params?.target_type) q.append("target_type", params.target_type);
+    if (params?.admin_id) q.append("admin_id", params.admin_id.toString());
+    if (params?.page) q.append("page", params.page.toString());
+    if (params?.limit) q.append("limit", params.limit.toString());
+    return this.request<import("@/types").AdminAuditLog[]>(`/admin/audit-logs?${q.toString()}`);
   }
 }

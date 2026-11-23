@@ -66,8 +66,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (payload: RegisterPayload): Promise<User> => {
-    const res = await ApiClient.register(payload);
-    return res.data;
+    setIsLoading(true);
+    try {
+      const res = await ApiClient.register(payload);
+      const userObj = res.data?.user;
+      if (userObj) {
+        setUser(userObj);
+        return userObj;
+      }
+      throw new Error(res.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {

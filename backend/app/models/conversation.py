@@ -1,38 +1,20 @@
 """
-AIRWISE AI — Conversation Model
+AIRWISE AI — Conversation Model (MongoDB Document)
 Represents interactive environmental assistance dialogues.
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from app.models.base import Base
+from app.models.base import Base, Column, DateTime, Integer, String, relationship
 
 
 class Conversation(Base):
     __tablename__ = "conversations"
+    __collection__ = "conversations"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True)
-    title = Column(String(255), default="New Conversation", nullable=False)
-    created_at = Column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        nullable=False,
-    )
-    updated_at = Column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-        nullable=False,
-    )
+    id = Column(name="id", type_hint=int, autoincrement=True)
+    user_id = Column(name="user_id", type_hint=int, default=None)
+    title = Column(name="title", type_hint=str, default="New Conversation")
+    created_at = Column(name="created_at", type_hint=datetime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(name="updated_at", type_hint=datetime, default=lambda: datetime.now(timezone.utc))
 
-    # Relationships
-    user = relationship("User", back_populates="conversations")
-    messages = relationship(
-        "Message",
-        back_populates="conversation",
-        cascade="all, delete-orphan",
-        order_by="Message.created_at",
-    )
-    feedback = relationship("Feedback", back_populates="conversation")
+    messages = relationship("Message", back_populates="conversation")

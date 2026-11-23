@@ -5,7 +5,7 @@ Implements registration, authentication, atomic token rotation, reuse detection,
 
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.config import settings
 from app.core.exceptions import (
     BadRequestException,
@@ -107,10 +107,12 @@ class AuthService:
         if not user.is_active:
             raise ForbiddenException("Account is deactivated. Please contact support.")
 
-        # Update last login timestamp
+        # Update last login timestamp directly
         user.last_login_at = datetime.now(timezone.utc)
-        db.commit()
-        db.refresh(user)
+        try:
+            db._db.users.update_one({"id": user.id}, {"$set": {"last_login_at": user.last_login_at}})
+        except Exception:
+            pass
         return user
 
     def create_auth_session(self, db: Session, user: User) -> Tuple[str, str]:

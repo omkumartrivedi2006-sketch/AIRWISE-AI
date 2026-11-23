@@ -1,26 +1,18 @@
 """
-AIRWISE AI — Message Model
+AIRWISE AI — Message Model (MongoDB Document)
 Stores messages within a conversation dialogue, supporting user, assistant, and system roles.
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import relationship
-from app.models.base import Base
+from app.models.base import Base, Column, DateTime, Integer, String, Text
 
 
 class Message(Base):
     __tablename__ = "messages"
+    __collection__ = "messages"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), index=True, nullable=False)
-    role = Column(String(20), nullable=False)  # 'user', 'assistant', 'system'
-    content = Column(Text, nullable=False)
-    created_at = Column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        nullable=False,
-    )
-
-    # Relationships
-    conversation = relationship("Conversation", back_populates="messages")
+    id = Column(name="id", type_hint=int, autoincrement=True)
+    conversation_id = Column(name="conversation_id", type_hint=int, index=True)
+    role = Column(name="role", type_hint=str)
+    content = Column(name="content", type_hint=str)
+    created_at = Column(name="created_at", type_hint=datetime, default=lambda: datetime.now(timezone.utc))

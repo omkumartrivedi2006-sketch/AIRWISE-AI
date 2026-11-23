@@ -4,7 +4,7 @@ POST /api/v1/feedback
 """
 
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.database import get_db
 from app.repositories.feedback_repository import feedback_repository
 from app.schemas.common import PaginationMeta, SuccessResponse

@@ -1,28 +1,20 @@
 """
-AIRWISE AI — Refresh Token Model
+AIRWISE AI — Refresh Token Model (MongoDB Document)
 Manages long-lived rotating refresh token sessions with cryptographic hashes.
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from app.models.base import Base
+from app.models.base import Base, Column, DateTime, Integer, String
 
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
+    __collection__ = "refresh_tokens"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    token_hash = Column(String(64), unique=True, index=True, nullable=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False, index=True)
-    revoked_at = Column(DateTime(timezone=True), nullable=True)
-    replaced_by_token_id = Column(Integer, ForeignKey("refresh_tokens.id", ondelete="SET NULL"), nullable=True)
-    created_at = Column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        nullable=False,
-    )
-
-    # Relationships
-    user = relationship("User", back_populates="refresh_tokens")
+    id = Column(name="id", type_hint=int, autoincrement=True)
+    user_id = Column(name="user_id", type_hint=int, index=True)
+    token_hash = Column(name="token_hash", type_hint=str, unique=True, index=True)
+    expires_at = Column(name="expires_at", type_hint=datetime, index=True)
+    revoked_at = Column(name="revoked_at", type_hint=datetime, default=None)
+    replaced_by_token_id = Column(name="replaced_by_token_id", type_hint=int, default=None)
+    created_at = Column(name="created_at", type_hint=datetime, default=lambda: datetime.now(timezone.utc))

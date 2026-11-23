@@ -5,9 +5,8 @@ Provides request-scoped user extraction, token validation, and RBAC enforcement.
 
 from typing import Optional
 from fastapi import Cookie, Depends, Header, HTTPException, Response, status
-from sqlalchemy.orm import Session
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import Session, get_db
 from app.core.exceptions import ForbiddenException, UnauthorizedException
 from app.core.security import decode_access_token
 from app.models.user import User
@@ -54,6 +53,28 @@ def get_current_user(
         raise ForbiddenException("Account is deactivated")
 
     return user
+
+
+def get_optional_current_user(
+    token: Optional[str] = Depends(get_token_from_header_or_cookie),
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    """Retrieve authenticated user if valid token present; returns None otherwise."""
+    if not token:
+        return None
+    try:
+        payload = decode_access_token(token)
+        if not payload:
+            return None
+        user_id_str = payload.get("sub")
+        if not user_id_str or not user_id_str.isdigit():
+            return None
+        user = db.query(User).filter(User.id == int(user_id_str)).first()
+        if user and user.is_active:
+            return user
+    except Exception:
+        return None
+    return None
 
 
 def require_authenticated_user(

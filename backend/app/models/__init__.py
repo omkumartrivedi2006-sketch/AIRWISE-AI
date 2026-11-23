@@ -13,6 +13,13 @@ from app.models.pollution import PollutionObservation
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.feedback import Feedback
+from app.models.user_preference import UserPreference
+from app.models.saved_location import SavedLocation
+from app.models.alert import AlertRule
+from app.models.notification import Notification, PushSubscription
+from app.models.recommendation import RecommendationCache
+from app.models.audit_log import AuditLog
+from app.models.environmental_review import EnvironmentalDataReview
 
 __all__ = [
     "Base",
@@ -26,4 +33,12 @@ __all__ = [
     "Conversation",
     "Message",
     "Feedback",
+    "UserPreference",
+    "SavedLocation",
+    "AlertRule",
+    "Notification",
+    "PushSubscription",
+    "RecommendationCache",
+    "AuditLog",
+    "EnvironmentalDataReview",
 ]

@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Wind, Lock, Mail, User, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2, Check } from "lucide-react";
+import { Wind, Lock, Mail, User, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2, Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { register, login, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -21,6 +21,13 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Auto-redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   // Live Password Strength Requirements
   const hasMinLength = password.length >= 12;
@@ -57,9 +64,7 @@ export default function RegisterPage() {
       });
 
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/login");
-      }, 2500);
+      router.replace("/dashboard");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Registration failed. Please verify your details.";
       setError(message);
@@ -69,36 +74,49 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16 sm:py-20 space-y-8">
-      {/* Brand Header */}
-      <div className="text-center space-y-2">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#28C7F5] to-[#38E0B4] flex items-center justify-center shadow-cyan-glow">
-            <Wind className="w-5 h-5 text-[#080A0D]" strokeWidth={2.5} />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-[#F5F7FA]">
-            AIRWISE<span className="text-[#28C7F5]">.AI</span>
-          </span>
+    <div className="min-h-screen flex flex-col justify-between px-4 py-8 sm:py-12">
+      {/* Top Navigation Bar with Back Button */}
+      <div className="w-full max-w-md mx-auto flex items-center justify-between pb-2">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-medium text-foreground-secondary hover:text-foreground transition-all duration-200 group px-3.5 py-1.5 rounded-lg bg-surface border border-border-subtle hover:border-primary/40 shadow-sm"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 text-primary group-hover:-translate-x-0.5 transition-transform duration-200" />
+          <span>Return to Landing Page</span>
         </Link>
-        <h1 className="text-2xl font-bold text-[#F5F7FA] mt-4">
-          Create Your AIRWISE Account
-        </h1>
-        <p className="text-xs text-[#A5B0BC]">
-          Join AIRWISE AI and explore a smarter way to understand pollution.
-        </p>
+        <span className="text-[11px] font-mono text-foreground-muted">AIRWISE AI</span>
       </div>
 
-      <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-5">
+      <div className="w-full max-w-md mx-auto space-y-6 my-auto">
+        {/* Brand Header */}
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white dark:text-black shadow-sm group-hover:scale-105 transition-transform">
+              <Wind className="w-5 h-5" strokeWidth={2.5} />
+            </div>
+            <span className="font-extrabold text-xl tracking-tight text-foreground">
+              AIRWISE<span className="text-primary">.AI</span>
+            </span>
+          </Link>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight mt-2">
+            Create Your Account
+          </h1>
+          <p className="text-xs text-foreground-secondary">
+            Join AIRWISE AI to track local air quality, save stations, and receive smart health alerts.
+          </p>
+        </div>
+
+        <Card className="p-6 bg-surface border-border-subtle shadow-md space-y-5">
         {error && (
-          <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-700 dark:text-red-300 font-mono">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-4 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 flex flex-col items-center text-center gap-2 text-xs text-[#38E0B4] font-mono">
-            <CheckCircle2 className="w-6 h-6 text-[#38E0B4]" />
+          <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex flex-col items-center text-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 font-mono">
+            <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             <span className="font-bold text-sm">Account Created Successfully!</span>
             <span>A verification token has been issued. Redirecting you to sign in...</span>
           </div>
@@ -107,8 +125,8 @@ export default function RegisterPage() {
         {!success && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-[#28C7F5]" />
+              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-primary" />
                 Full Name
               </label>
               <input
@@ -118,29 +136,29 @@ export default function RegisterPage() {
                 placeholder="Dr. Elena Rostova"
                 required
                 disabled={isLoading}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none focus:border-[#28C7F5]/50 disabled:opacity-50"
+                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-[#28C7F5]" />
+              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-primary" />
                 Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="elena@university.edu"
+                placeholder="elena@example.com"
                 required
                 disabled={isLoading}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none focus:border-[#28C7F5]/50 disabled:opacity-50"
+                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-[#38E0B4]" />
+              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-primary" />
                 Password (Argon2id Encrypted)
               </label>
               <div className="relative">
@@ -151,41 +169,42 @@ export default function RegisterPage() {
                   placeholder="At least 12 characters"
                   required
                   disabled={isLoading}
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none focus:border-[#28C7F5]/50 disabled:opacity-50"
+                  className="w-full px-3.5 py-2 pr-10 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7A8D] hover:text-[#F5F7FA] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors p-1"
                   tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
               {/* Password Requirement Checklist */}
-              <div className="p-3 rounded-lg bg-[#10151B] border border-white/[0.06] grid grid-cols-2 gap-1.5 text-[11px] font-mono mt-2">
-                <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-[#38E0B4]" : "text-[#6B7A8D]"}`}>
+              <div className="p-3 rounded-lg bg-background-secondary border border-border-subtle grid grid-cols-2 gap-1.5 text-[11px] font-mono mt-2">
+                <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
                   <Check className="w-3.5 h-3.5" /> 12+ Characters
                 </div>
-                <div className={`flex items-center gap-1.5 ${hasUpper ? "text-[#38E0B4]" : "text-[#6B7A8D]"}`}>
+                <div className={`flex items-center gap-1.5 ${hasUpper ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
                   <Check className="w-3.5 h-3.5" /> Uppercase (A-Z)
                 </div>
-                <div className={`flex items-center gap-1.5 ${hasLower ? "text-[#38E0B4]" : "text-[#6B7A8D]"}`}>
+                <div className={`flex items-center gap-1.5 ${hasLower ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
                   <Check className="w-3.5 h-3.5" /> Lowercase (a-z)
                 </div>
-                <div className={`flex items-center gap-1.5 ${hasNumber ? "text-[#38E0B4]" : "text-[#6B7A8D]"}`}>
-                  <Check className="w-3.5 h-3.5" /> Numeric Digit (0-9)
+                <div className={`flex items-center gap-1.5 ${hasNumber ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
+                  <Check className="w-3.5 h-3.5" /> Numeric (0-9)
                 </div>
-                <div className={`flex items-center gap-1.5 col-span-2 ${hasSpecial ? "text-[#38E0B4]" : "text-[#6B7A8D]"}`}>
-                  <Check className="w-3.5 h-3.5" /> Special Symbol (!@#$%^&*)
+                <div className={`flex items-center gap-1.5 col-span-2 ${hasSpecial ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
+                  <Check className="w-3.5 h-3.5" /> Symbol (!@#$%^&*)
                 </div>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-[#38E0B4]" />
+              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-primary" />
                 Confirm Password
               </label>
               <input
@@ -195,14 +214,13 @@ export default function RegisterPage() {
                 placeholder="Re-enter your password"
                 required
                 disabled={isLoading}
-                className={`w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none disabled:opacity-50 ${
-                  confirmPassword && !passwordsMatch
-                    ? "border-rose-500/50 focus:border-rose-500"
-                    : "border-white/[0.09] focus:border-[#28C7F5]/50"
-                }`}
+                className={`w-full px-3.5 py-2 text-xs rounded-lg bg-surface border text-foreground placeholder:text-foreground-muted focus:outline-none disabled:opacity-50 ${confirmPassword && !passwordsMatch
+                  ? "border-red-500/50 focus:border-red-500"
+                  : "border-border-subtle focus:border-primary"
+                  }`}
               />
               {confirmPassword && !passwordsMatch && (
-                <p className="text-[11px] font-mono text-rose-400">Passwords do not match</p>
+                <p className="text-[11px] font-mono text-red-500">Passwords do not match</p>
               )}
             </div>
 
@@ -212,15 +230,15 @@ export default function RegisterPage() {
                 id="terms"
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded bg-[#10151B] border-white/[0.12] text-[#28C7F5] focus:ring-0"
+                className="w-4 h-4 mt-0.5 rounded border-border-subtle text-primary focus:ring-0 bg-surface"
               />
-              <label htmlFor="terms" className="text-xs text-[#A5B0BC] leading-relaxed">
-                I acknowledge the{" "}
-                <Link href="/terms" className="text-[#28C7F5] hover:underline">
+              <label htmlFor="terms" className="text-xs text-foreground-secondary leading-relaxed">
+                I agree to the{" "}
+                <Link href="/terms" className="text-primary hover:underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-[#28C7F5] hover:underline">
+                <Link href="/privacy" className="text-primary hover:underline">
                   Privacy Policy
                 </Link>
                 .
@@ -231,12 +249,12 @@ export default function RegisterPage() {
               type="submit"
               variant="primary"
               size="md"
-              className="w-full mt-2"
+              className="w-full text-xs font-semibold mt-2"
               disabled={!isFormValid || isLoading}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Creating Account...
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating Account...
                 </span>
               ) : (
                 "Create Account"
@@ -245,13 +263,19 @@ export default function RegisterPage() {
           </form>
         )}
 
-        <div className="pt-4 border-t border-white/[0.06] text-center text-xs text-[#A5B0BC]">
+        <div className="pt-4 border-t border-border-subtle text-center text-xs text-foreground-secondary">
           Already have an account?{" "}
-          <Link href="/login" className="text-[#28C7F5] font-semibold hover:underline">
+          <Link href="/login" className="text-primary font-semibold hover:underline">
             Sign in
           </Link>
         </div>
       </Card>
     </div>
+
+    {/* Subtle Footer */}
+    <div className="text-center pt-8 pb-2 text-[11px] text-foreground-muted font-mono">
+      AIRWISE AI &bull; Environmental &amp; Atmospheric Intelligence
+    </div>
+  </div>
   );
 }

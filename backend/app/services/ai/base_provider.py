@@ -5,7 +5,7 @@ without modifying upstream domain logic.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 class BaseAIProvider(ABC):
@@ -20,10 +20,14 @@ class BaseAIProvider(ABC):
     async def generate_response(
         self,
         prompt: str,
+        history: Optional[List[Dict[str, str]]] = None,
         context: Optional[Dict[str, Any]] = None,
         system_instruction: Optional[str] = None,
     ) -> str:
-        """Generates AI guidance based on user input and environmental telemetry context."""
+        """
+        Generates AI guidance based on user input, multi-turn dialogue history,
+        and environmental telemetry context.
+        """
         pass
 
     @abstractmethod

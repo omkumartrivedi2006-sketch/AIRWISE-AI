@@ -4,7 +4,7 @@ Persists user and assistant messages within a conversation dialogue.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.exceptions import AirwiseException
 from app.models.message import Message
 from app.repositories.conversation_repository import conversation_repository

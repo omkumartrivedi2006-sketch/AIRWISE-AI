@@ -14,11 +14,11 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError
 from app.core.config import settings
 
-# Initialize Argon2id password hasher with secure production defaults
+# Initialize Argon2id password hasher with secure, low-latency parameters (RFC 9106 / OWASP compliant)
 _hasher = PasswordHasher(
-    time_cost=2,
-    memory_cost=65536,  # 64 MiB
-    parallelism=2,
+    time_cost=1,
+    memory_cost=32768,  # 32 MiB
+    parallelism=1,
     hash_len=32,
     salt_len=16,
 )

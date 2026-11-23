@@ -4,7 +4,7 @@ Business logic layer for geographical monitoring stations.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.exceptions import AirwiseException
 from app.models.location import Location
 from app.repositories.location_repository import location_repository

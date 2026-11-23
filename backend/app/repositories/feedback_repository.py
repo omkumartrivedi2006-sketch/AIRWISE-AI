@@ -4,7 +4,7 @@ Stores ratings and user feedback for platform quality assessment.
 """
 
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.models.feedback import Feedback
 from app.schemas.feedback import FeedbackCreate
 

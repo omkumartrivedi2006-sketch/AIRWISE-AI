@@ -24,7 +24,7 @@ def setup_logging() -> logging.Logger:
 
     # Quiet external third-party loggers if needed
     logging.getLogger("uvicorn.access").setLevel(level)
-    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING if not settings.DEBUG else logging.INFO)
+    logging.getLogger("pymongo").setLevel(logging.WARNING)
 
     logger = logging.getLogger("airwise")
     logger.info("Structured logging initialized at level %s", settings.LOG_LEVEL.upper())

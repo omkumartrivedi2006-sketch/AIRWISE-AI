@@ -4,7 +4,7 @@ Manages user profiles, lookups, and safe attribute updates.
 """
 
 from typing import Optional
-from sqlalchemy.orm import Session
+from app.core.database import MongoSession as Session
 from app.core.exceptions import NotFoundException
 from app.models.user import User
 from app.schemas.user import UserProfileUpdate
