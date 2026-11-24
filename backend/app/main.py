@@ -100,6 +100,10 @@ def create_application() -> FastAPI:
 
     # 3. Include API v1 Router
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+    # Resilient aliases so frontend requests with or without /api/v1 prefix succeed seamlessly
+    app.include_router(api_router, prefix="/api")
+    from app.api.v1.endpoints import auth
+    app.include_router(auth.router, prefix="/auth", tags=["Auth-Alias"])
 
     # 4. Root Endpoint
     @app.get("/", tags=["Root"])

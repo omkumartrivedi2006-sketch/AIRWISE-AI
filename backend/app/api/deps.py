@@ -99,14 +99,17 @@ def require_admin(
 # Cookie Helper Functions
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
     """Set secure HttpOnly cookies for access and refresh tokens."""
+    is_secure = settings.COOKIE_SECURE or settings.is_production
+    samesite_mode = "none" if is_secure else settings.COOKIE_SAMESITE
+
     # 1. Access Token Cookie (15 mins)
     response.set_cookie(
         key="access_token",
         value=access_token,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         httponly=True,
-        secure=settings.COOKIE_SECURE or settings.is_production,
-        samesite=settings.COOKIE_SAMESITE,
+        secure=is_secure,
+        samesite=samesite_mode,
         domain=settings.COOKIE_DOMAIN,
         path="/",
     )
@@ -117,8 +120,8 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         value=refresh_token,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         httponly=True,
-        secure=settings.COOKIE_SECURE or settings.is_production,
-        samesite=settings.COOKIE_SAMESITE,
+        secure=is_secure,
+        samesite=samesite_mode,
         domain=settings.COOKIE_DOMAIN,
         path="/api/v1/auth",  # Restricted path for refresh token cookie
     )
@@ -126,15 +129,20 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
 
 def clear_auth_cookies(response: Response) -> None:
     """Delete access and refresh token cookies on logout."""
+    is_secure = settings.COOKIE_SECURE or settings.is_production
+    samesite_mode = "none" if is_secure else settings.COOKIE_SAMESITE
+
     response.delete_cookie(
         key="access_token",
         path="/",
         domain=settings.COOKIE_DOMAIN,
-        samesite=settings.COOKIE_SAMESITE,
+        samesite=samesite_mode,
+        secure=is_secure,
     )
     response.delete_cookie(
         key="refresh_token",
         path="/api/v1/auth",
         domain=settings.COOKIE_DOMAIN,
-        samesite=settings.COOKIE_SAMESITE,
+        samesite=samesite_mode,
+        secure=is_secure,
     )

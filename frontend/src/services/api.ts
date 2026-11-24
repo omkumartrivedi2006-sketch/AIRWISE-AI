@@ -41,19 +41,47 @@ import {
   ProfileUpdatePayload,
 } from "@/types/auth";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:8000/api/v1";
+const API_BASE_URL = (() => {
+  let base =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:8000/api/v1";
+
+  base = base.replace(/\/+$/, "");
+
+  if (!base.endsWith("/api/v1")) {
+    if (base.endsWith("/api")) {
+      base = `${base}/v1`;
+    } else {
+      base = `${base}/api/v1`;
+    }
+  }
+
+  return base;
+})();
 
 export class ApiClient {
   private static accessToken: string | null = null;
 
   public static setAccessToken(token: string | null) {
     this.accessToken = token;
+    if (typeof window !== "undefined") {
+      try {
+        if (token) {
+          localStorage.setItem("airwise_token", token);
+        } else {
+          localStorage.removeItem("airwise_token");
+        }
+      } catch {}
+    }
   }
 
   public static getAccessToken(): string | null {
+    if (!this.accessToken && typeof window !== "undefined") {
+      try {
+        this.accessToken = localStorage.getItem("airwise_token");
+      } catch {}
+    }
     return this.accessToken;
   }
 
