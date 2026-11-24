@@ -8,7 +8,7 @@ POST /api/v1/indoor/ai-consult
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
-from app.api.deps import require_authenticated_user
+from app.api.deps import require_authenticated_user, get_optional_current_user
 from app.core.database import MongoSession as Session
 from app.core.database import get_db
 from app.models.user import User
@@ -92,7 +92,7 @@ async def get_latest_assessment(
 )
 async def consult_indoor_ai(
     request: IndoorAIAdviceRequest,
-    current_user: User = Depends(require_authenticated_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     advice = await indoor_air_service.get_ai_advice(db, current_user, request)

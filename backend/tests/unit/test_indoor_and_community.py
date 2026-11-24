@@ -53,3 +53,33 @@ def test_community_reference_id_generation():
     assert len(parts) == 3
     assert len(parts[1]) == 4  # year
     assert len(parts[2]) == 5  # random code
+
+
+@pytest.mark.asyncio
+async def test_indoor_air_ai_consultation():
+    """Test AI indoor consultation structured response and fallback generator."""
+    from app.schemas.indoor_air import IndoorAIAdviceRequest
+
+    req = IndoorAIAdviceRequest(
+        question="How can I improve my bedroom air quality and reduce night time dust?",
+        room_type="bedroom",
+    )
+    res = await indoor_air_service.get_ai_advice(db=None, current_user=None, request=req)
+    assert res.explanation is not None
+    assert len(res.explanation) > 0
+    assert len(res.action_steps) >= 3
+    assert len(res.daily_routine) >= 3
+    assert len(res.weekly_maintenance) >= 3
+    assert "diagnosis" in res.disclaimer.lower()
+
+    # Test domain fallback generator explicitly
+    fallback = indoor_air_service._generate_grounded_indoor_fallback(
+        question="How can I improve my bedroom air quality and reduce night time dust?",
+        ctx={"room_type": "bedroom", "ventilation": "moderate"},
+    )
+    assert "Bedroom Air Quality" in fallback.explanation
+    assert len(fallback.action_steps) >= 3
+    assert len(fallback.daily_routine) >= 3
+    assert len(fallback.weekly_maintenance) >= 3
+
+
