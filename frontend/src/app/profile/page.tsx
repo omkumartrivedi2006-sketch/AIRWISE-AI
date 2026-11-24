@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   User as UserIcon,
-  Mail,
   Shield,
   KeyRound,
   CheckCircle2,
@@ -13,7 +12,6 @@ import {
   Calendar,
   Clock,
   Loader2,
-  Lock,
   Sliders,
   MapPin,
   Bell,
@@ -21,7 +19,6 @@ import {
   Trash2,
   Star,
   Search,
-  ExternalLink,
   VolumeX,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -89,7 +86,6 @@ function ProfileContent() {
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [newCustomName, setNewCustomName] = useState("");
-  const [selectedResult, setSelectedResult] = useState<LocationSearchResult | null>(null);
 
   // Fetch initial preferences & saved locations
   const fetchPreferencesAndLocations = useCallback(async () => {
@@ -228,7 +224,6 @@ function ProfileContent() {
     setLocLoading(true);
     setLocError(null);
     try {
-      // First ensure location exists by triggering a latest pollution fetch
       const pollRes = await ApiClient.getLatestPollutionForLocation({
         city: result.name,
         lat: result.latitude,
@@ -246,7 +241,6 @@ function ProfileContent() {
           setSavedLocations((prev) => [saveRes.data, ...prev.filter((l) => l.id !== saveRes.data.id)]);
           setSearchQuery("");
           setSearchResults([]);
-          setSelectedResult(null);
           setNewCustomName("");
         }
       } else {
@@ -284,69 +278,71 @@ function ProfileContent() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/[0.09] gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-border-subtle gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-[#28C7F5]" />
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F7FA] tracking-tight">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <UserIcon className="w-5 h-5" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
               Personalized Settings & Profile
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-[#A5B0BC] mt-1 font-mono">
+          <p className="text-xs sm:text-sm text-foreground-secondary mt-1">
             Customize your environmental thresholds, saved locations, telemetry preferences, and credentials.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant={user?.role === "ADMIN" ? "cyan" : "outline"} size="md" className="font-mono text-xs">
+          <Badge variant={user?.role === "ADMIN" ? "good" : "outline"} size="md">
             Role: {user?.role || "USER"}
           </Badge>
-          <Badge variant={user?.is_verified ? "good" : "sensitive"} size="md" className="font-mono text-xs">
+          <Badge variant={user?.is_verified ? "good" : "sensitive"} size="md">
             {user?.is_verified ? "Email Verified" : "Unverified"}
           </Badge>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border-subtle pb-3">
         <button
           onClick={() => setActiveTab("account")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
             activeTab === "account"
-              ? "bg-[#28C7F5] text-black font-semibold shadow-md shadow-[#28C7F5]/20"
-              : "bg-[#141B23] text-[#A5B0BC] hover:text-[#F5F7FA] border border-white/[0.06]"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "bg-surface text-foreground-secondary hover:text-foreground border border-border-subtle hover:bg-surface-hover"
           }`}
         >
           <UserIcon className="w-3.5 h-3.5" /> Account & Security
         </button>
         <button
           onClick={() => setActiveTab("preferences")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
             activeTab === "preferences"
-              ? "bg-[#28C7F5] text-black font-semibold shadow-md shadow-[#28C7F5]/20"
-              : "bg-[#141B23] text-[#A5B0BC] hover:text-[#F5F7FA] border border-white/[0.06]"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "bg-surface text-foreground-secondary hover:text-foreground border border-border-subtle hover:bg-surface-hover"
           }`}
         >
           <Sliders className="w-3.5 h-3.5" /> Personal Preferences
         </button>
         <button
           onClick={() => setActiveTab("locations")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
             activeTab === "locations"
-              ? "bg-[#28C7F5] text-black font-semibold shadow-md shadow-[#28C7F5]/20"
-              : "bg-[#141B23] text-[#A5B0BC] hover:text-[#F5F7FA] border border-white/[0.06]"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "bg-surface text-foreground-secondary hover:text-foreground border border-border-subtle hover:bg-surface-hover"
           }`}
         >
           <MapPin className="w-3.5 h-3.5" /> Saved Locations ({savedLocations.length})
         </button>
         <button
           onClick={() => setActiveTab("notifications")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
             activeTab === "notifications"
-              ? "bg-[#28C7F5] text-black font-semibold shadow-md shadow-[#28C7F5]/20"
-              : "bg-[#141B23] text-[#A5B0BC] hover:text-[#F5F7FA] border border-white/[0.06]"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "bg-surface text-foreground-secondary hover:text-foreground border border-border-subtle hover:bg-surface-hover"
           }`}
         >
           <Bell className="w-3.5 h-3.5" /> Notification Channels & Quiet Hours
@@ -356,67 +352,67 @@ function ProfileContent() {
       {/* TAB 1: ACCOUNT & CREDENTIALS */}
       {activeTab === "account" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-1 p-6 bg-[#141B23] border-white/[0.09] space-y-6">
+          <Card className="lg:col-span-1 p-6 bg-surface border-border-subtle space-y-6">
             <div className="flex flex-col items-center text-center space-y-3">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#28C7F5]/20 to-[#38E0B4]/20 border border-[#28C7F5]/40 flex items-center justify-center text-2xl font-bold font-mono text-[#28C7F5]">
+              <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-2xl font-bold text-primary">
                 {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h2 className="text-base font-bold text-[#F5F7FA]">{user?.full_name || "AIRWISE User"}</h2>
-                <p className="text-xs font-mono text-[#A5B0BC]">{user?.email}</p>
+                <h2 className="text-base font-bold text-foreground">{user?.full_name || "AIRWISE User"}</h2>
+                <p className="text-xs text-foreground-secondary">{user?.email}</p>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/[0.06] space-y-3 text-xs font-mono">
-              <div className="flex items-center justify-between text-[#A5B0BC]">
-                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-[#28C7F5]" /> Member Since:</span>
-                <span className="text-[#F5F7FA]">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</span>
+            <div className="pt-4 border-t border-border-subtle space-y-3 text-xs">
+              <div className="flex items-center justify-between text-foreground-secondary">
+                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary" /> Member Since:</span>
+                <span className="text-foreground">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</span>
               </div>
-              <div className="flex items-center justify-between text-[#A5B0BC]">
-                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#38E0B4]" /> Last Sign In:</span>
-                <span className="text-[#F5F7FA]">{user?.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : "Active Now"}</span>
+              <div className="flex items-center justify-between text-foreground-secondary">
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-emerald-500" /> Last Sign In:</span>
+                <span className="text-foreground">{user?.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : "Active Now"}</span>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/[0.06] space-y-2">
-              <Button variant="outline" size="sm" onClick={() => logout()} className="w-full text-xs font-mono text-rose-400 hover:text-rose-300 border-rose-500/30 hover:bg-rose-500/10">
+            <div className="pt-4 border-t border-border-subtle space-y-2">
+              <Button variant="outline" size="sm" onClick={() => logout()} className="w-full text-xs text-rose-500 hover:text-rose-600 border-rose-500/30 hover:bg-rose-500/10">
                 <LogOut className="w-3.5 h-3.5 mr-1.5" /> Sign Out
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => logoutAll()} className="w-full text-[11px] font-mono text-[#6B7A8D] hover:text-[#A5B0BC]">
+              <Button variant="ghost" size="sm" onClick={() => logoutAll()} className="w-full text-[11px] text-foreground-muted hover:text-foreground-secondary">
                 Terminate All Active Sessions
               </Button>
             </div>
           </Card>
 
           <div className="lg:col-span-2 space-y-6">
-            <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider font-mono text-[#F5F7FA] flex items-center gap-2">
-                <UserIcon className="w-4 h-4 text-[#28C7F5]" /> Profile Information
+            <Card className="p-6 bg-surface border-border-subtle space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                <UserIcon className="w-4 h-4 text-primary" /> Profile Information
               </h3>
               {profileError && (
-                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400 font-mono flex items-center gap-2">
+                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-500 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{profileError}</span>
                 </div>
               )}
               {profileSuccess && (
-                <div className="p-3 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 text-xs text-[#38E0B4] font-mono flex items-center gap-2">
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-500 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                   <span>Profile attributes updated successfully.</span>
                 </div>
               )}
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#A5B0BC]">Email Address (Immutable)</label>
-                  <input type="email" value={user?.email || ""} disabled className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B]/50 border border-white/[0.05] text-sm text-[#6B7A8D] cursor-not-allowed font-mono" />
+                  <label className="text-xs font-semibold text-foreground-secondary">Email Address (Immutable)</label>
+                  <input type="email" value={user?.email || ""} disabled className="w-full px-3.5 py-2.5 rounded-lg bg-surface-subtle/50 border border-border-subtle text-sm text-foreground-muted cursor-not-allowed" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#A5B0BC]">Full Name</label>
-                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required disabled={profileLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]/50" />
+                  <label className="text-xs font-semibold text-foreground-secondary">Full Name</label>
+                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required disabled={profileLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-surface-subtle border border-border-subtle text-sm text-foreground focus:outline-none focus:border-primary" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#A5B0BC]">Profile Image URL</label>
-                  <input type="url" value={profileImage} onChange={(e) => setProfileImage(e.target.value)} placeholder="https://..." disabled={profileLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none focus:border-[#28C7F5]/50" />
+                  <label className="text-xs font-semibold text-foreground-secondary">Profile Image URL</label>
+                  <input type="url" value={profileImage} onChange={(e) => setProfileImage(e.target.value)} placeholder="https://..." disabled={profileLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-surface-subtle border border-border-subtle text-sm text-foreground placeholder-foreground-muted focus:outline-none focus:border-primary" />
                 </div>
                 <div className="flex justify-end pt-2">
                   <Button type="submit" variant="primary" size="md" disabled={profileLoading}>
@@ -426,35 +422,35 @@ function ProfileContent() {
               </form>
             </Card>
 
-            <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider font-mono text-[#F5F7FA] flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-[#38E0B4]" /> Change Password
+            <Card className="p-6 bg-surface border-border-subtle space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-emerald-500" /> Change Password
               </h3>
               {passwordError && (
-                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400 font-mono flex items-center gap-2">
+                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-500 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{passwordError}</span>
                 </div>
               )}
               {passwordSuccess && (
-                <div className="p-3 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 text-xs text-[#38E0B4] font-mono flex items-center gap-2">
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-500 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                   <span>Password updated. Other active sessions have been terminated.</span>
                 </div>
               )}
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#A5B0BC]">Current Password</label>
-                  <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]/50" />
+                  <label className="text-xs font-semibold text-foreground-secondary">Current Password</label>
+                  <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-surface-subtle border border-border-subtle text-sm text-foreground focus:outline-none focus:border-primary" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-[#A5B0BC]">New Password (12+ chars)</label>
-                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]/50" />
+                    <label className="text-xs font-semibold text-foreground-secondary">New Password (12+ chars)</label>
+                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-surface-subtle border border-border-subtle text-sm text-foreground focus:outline-none focus:border-primary" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-[#A5B0BC]">Confirm New Password</label>
-                    <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} required disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border border-white/[0.09] text-sm text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]/50" />
+                    <label className="text-xs font-semibold text-foreground-secondary">Confirm New Password</label>
+                    <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} required disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-surface-subtle border border-border-subtle text-sm text-foreground focus:outline-none focus:border-primary" />
                   </div>
                 </div>
                 <div className="flex justify-end pt-2">
@@ -470,23 +466,23 @@ function ProfileContent() {
 
       {/* TAB 2: PERSONAL PREFERENCES */}
       {activeTab === "preferences" && preferences && (
-        <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-6">
-          <div className="pb-3 border-b border-white/[0.06]">
-            <h3 className="text-base font-bold font-mono text-[#F5F7FA] flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-[#28C7F5]" /> Environmental & Measurement Preferences
+        <Card className="p-6 bg-surface border-border-subtle space-y-6">
+          <div className="pb-3 border-b border-border-subtle">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-primary" /> Environmental & Measurement Preferences
             </h3>
-            <p className="text-xs font-mono text-[#A5B0BC] mt-1">
+            <p className="text-xs text-foreground-secondary mt-1">
               Configure your default measurement standards, display units, and environmental learning interests.
             </p>
           </div>
 
           {prefError && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-mono">
+            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-500">
               {prefError}
             </div>
           )}
           {prefSuccess && (
-            <div className="p-3 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 text-xs text-[#38E0B4] font-mono">
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-500">
               Preferences updated successfully.
             </div>
           )}
@@ -494,11 +490,11 @@ function ProfileContent() {
           <form onSubmit={handlePreferencesSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-xs font-mono text-[#A5B0BC] mb-1">Temperature Unit</label>
+                <label className="block text-xs font-semibold text-foreground-secondary mb-1">Temperature Unit</label>
                 <select
                   value={preferences.temperature_unit}
                   onChange={(e) => setPreferences({ ...preferences, temperature_unit: e.target.value as "C" | "F" })}
-                  className="w-full bg-[#10151B] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]"
+                  className="w-full bg-surface-subtle border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                 >
                   <option value="C">Celsius (°C)</option>
                   <option value="F">Fahrenheit (°F)</option>
@@ -506,11 +502,11 @@ function ProfileContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#A5B0BC] mb-1">Preferred AQI Standard</label>
+                <label className="block text-xs font-semibold text-foreground-secondary mb-1">Preferred AQI Standard</label>
                 <select
                   value={preferences.preferred_aqi_scale}
                   onChange={(e) => setPreferences({ ...preferences, preferred_aqi_scale: e.target.value as "US_EPA" | "IN_NAAQS" })}
-                  className="w-full bg-[#10151B] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]"
+                  className="w-full bg-surface-subtle border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                 >
                   <option value="US_EPA">US EPA Standard (0–500)</option>
                   <option value="IN_NAAQS">Indian NAAQS Standard (0–500)</option>
@@ -518,21 +514,21 @@ function ProfileContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#A5B0BC] mb-1">Timezone</label>
+                <label className="block text-xs font-semibold text-foreground-secondary mb-1">Timezone</label>
                 <input
                   type="text"
                   value={preferences.timezone}
                   onChange={(e) => setPreferences({ ...preferences, timezone: e.target.value })}
-                  className="w-full bg-[#10151B] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]"
+                  className="w-full bg-surface-subtle border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#A5B0BC] mb-1">Interface Language</label>
+                <label className="block text-xs font-semibold text-foreground-secondary mb-1">Interface Language</label>
                 <select
                   value={preferences.preferred_language}
                   onChange={(e) => setPreferences({ ...preferences, preferred_language: e.target.value })}
-                  className="w-full bg-[#10151B] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]"
+                  className="w-full bg-surface-subtle border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                 >
                   <option value="en">English (US/UK)</option>
                   <option value="es">Español</option>
@@ -543,8 +539,8 @@ function ProfileContent() {
             </div>
 
             {/* Environmental Interests Multi-Select */}
-            <div className="space-y-3 pt-3 border-t border-white/[0.06]">
-              <label className="block text-xs font-bold font-mono text-[#F5F7FA]">
+            <div className="space-y-3 pt-3 border-t border-border-subtle">
+              <label className="block text-xs font-bold text-foreground">
                 Environmental Focus Areas
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -553,10 +549,10 @@ function ProfileContent() {
                   return (
                     <label
                       key={interest.id}
-                      className={`flex items-center gap-2 p-3 rounded-lg border text-xs font-mono cursor-pointer transition-all ${
+                      className={`flex items-center gap-2 p-3 rounded-lg border text-xs cursor-pointer transition-all ${
                         checked
-                          ? "bg-[#28C7F5]/10 border-[#28C7F5]/30 text-[#F5F7FA]"
-                          : "bg-[#10151B] border-white/[0.05] text-[#A5B0BC] hover:border-white/10"
+                          ? "bg-primary/10 border-primary/40 text-foreground"
+                          : "bg-surface-subtle border-border-subtle text-foreground-secondary hover:border-primary/20"
                       }`}
                     >
                       <input
@@ -568,7 +564,7 @@ function ProfileContent() {
                             : preferences.environmental_interests.filter((i) => i !== interest.id);
                           setPreferences({ ...preferences, environmental_interests: updated });
                         }}
-                        className="rounded border-white/20 bg-[#10151B] text-[#28C7F5]"
+                        className="rounded border-border-subtle bg-surface accent-primary"
                       />
                       <span>{interest.label}</span>
                     </label>
@@ -578,8 +574,8 @@ function ProfileContent() {
             </div>
 
             {/* Preferred Information Types */}
-            <div className="space-y-3 pt-3 border-t border-white/[0.06]">
-              <label className="block text-xs font-bold font-mono text-[#F5F7FA]">
+            <div className="space-y-3 pt-3 border-t border-border-subtle">
+              <label className="block text-xs font-bold text-foreground">
                 Preferred Information Streams
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -588,10 +584,10 @@ function ProfileContent() {
                   return (
                     <label
                       key={info.id}
-                      className={`flex items-center gap-2 p-3 rounded-lg border text-xs font-mono cursor-pointer transition-all ${
+                      className={`flex items-center gap-2 p-3 rounded-lg border text-xs cursor-pointer transition-all ${
                         checked
-                          ? "bg-[#38E0B4]/10 border-[#38E0B4]/30 text-[#F5F7FA]"
-                          : "bg-[#10151B] border-white/[0.05] text-[#A5B0BC] hover:border-white/10"
+                          ? "bg-primary/10 border-primary/40 text-foreground"
+                          : "bg-surface-subtle border-border-subtle text-foreground-secondary hover:border-primary/20"
                       }`}
                     >
                       <input
@@ -603,7 +599,7 @@ function ProfileContent() {
                             : preferences.preferred_information.filter((i) => i !== info.id);
                           setPreferences({ ...preferences, preferred_information: updated });
                         }}
-                        className="rounded border-white/20 bg-[#10151B] text-[#38E0B4]"
+                        className="rounded border-border-subtle bg-surface accent-primary"
                       />
                       <span>{info.label}</span>
                     </label>
@@ -612,8 +608,8 @@ function ProfileContent() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-white/[0.06]">
-              <Button type="submit" disabled={prefLoading} className="font-mono text-xs bg-[#28C7F5] hover:bg-[#28C7F5]/90 text-black">
+            <div className="flex justify-end pt-4 border-t border-border-subtle">
+              <Button type="submit" variant="primary" disabled={prefLoading}>
                 {prefLoading ? "Saving Preferences..." : "Save Preferences"}
               </Button>
             </div>
@@ -624,18 +620,18 @@ function ProfileContent() {
       {/* TAB 3: SAVED LOCATIONS */}
       {activeTab === "locations" && (
         <div className="space-y-6">
-          <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-4">
-            <div className="pb-3 border-b border-white/[0.06]">
-              <h3 className="text-base font-bold font-mono text-[#F5F7FA] flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#28C7F5]" /> Add New Monitored Location
+          <Card className="p-6 bg-surface border-border-subtle space-y-4">
+            <div className="pb-3 border-b border-border-subtle">
+              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                <Plus className="w-4 h-4 text-primary" /> Add New Monitored Location
               </h3>
-              <p className="text-xs font-mono text-[#A5B0BC] mt-1">
+              <p className="text-xs text-foreground-secondary mt-1">
                 Search global air monitoring stations via Open-Meteo geocoding to bookmark in your personal portfolio.
               </p>
             </div>
 
             {locError && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-mono">
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-500">
                 {locError}
               </div>
             )}
@@ -646,9 +642,9 @@ function ProfileContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search city (e.g. London, Tokyo, Delhi)..."
-                className="flex-1 bg-[#10151B] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA] focus:outline-none focus:border-[#28C7F5]"
+                className="flex-1 bg-surface-subtle border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
               />
-              <Button type="submit" disabled={searchLoading} className="font-mono text-xs bg-[#28C7F5] text-black">
+              <Button type="submit" variant="primary" size="sm" disabled={searchLoading}>
                 {searchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               </Button>
             </form>
@@ -656,22 +652,23 @@ function ProfileContent() {
             {/* Search Results Dropdown */}
             {searchResults.length > 0 && (
               <div className="space-y-2 pt-2">
-                <p className="text-[11px] font-mono text-[#6B7A8D]">Select location to add:</p>
+                <p className="text-[11px] text-foreground-muted">Select location to add:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {searchResults.map((r, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-lg bg-[#10151B] border border-white/[0.08] hover:border-[#28C7F5]/50 flex items-center justify-between"
+                      className="p-3 rounded-lg bg-surface-subtle border border-border-subtle hover:border-primary/50 flex items-center justify-between"
                     >
                       <div>
-                        <div className="text-xs font-bold text-[#F5F7FA] font-mono">{r.name}</div>
-                        <div className="text-[10px] text-[#A5B0BC] font-mono">{r.country} ({r.latitude.toFixed(2)}, {r.longitude.toFixed(2)})</div>
+                        <div className="text-xs font-bold text-foreground">{r.name}</div>
+                        <div className="text-[10px] text-foreground-muted">{r.country} ({r.latitude.toFixed(2)}, {r.longitude.toFixed(2)})</div>
                       </div>
                       <Button
                         size="sm"
+                        variant="primary"
                         onClick={() => handleAddLocation(r)}
                         disabled={locLoading}
-                        className="h-7 text-[11px] font-mono bg-[#38E0B4] text-black hover:bg-[#38E0B4]/90"
+                        className="h-7 text-[11px]"
                       >
                         Bookmark
                       </Button>
@@ -683,38 +680,38 @@ function ProfileContent() {
           </Card>
 
           {/* Saved Locations List */}
-          <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-4">
-            <h3 className="text-base font-bold font-mono text-[#F5F7FA] flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-[#38E0B4]" /> Bookmarked Monitoring Stations
+          <Card className="p-6 bg-surface border-border-subtle space-y-4">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-emerald-500" /> Bookmarked Monitoring Stations
             </h3>
 
             {savedLocations.length === 0 ? (
-              <div className="py-8 text-center text-xs font-mono text-[#A5B0BC] space-y-2">
+              <div className="py-8 text-center text-xs text-foreground-secondary space-y-2">
                 <p>No saved locations yet.</p>
-                <p className="text-[11px] text-[#6B7A8D]">Use the search bar above to bookmark your primary cities.</p>
+                <p className="text-[11px] text-foreground-muted">Use the search bar above to bookmark your primary cities.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {savedLocations.map((loc) => (
                   <div
                     key={loc.id}
-                    className="p-4 rounded-xl bg-[#10151B] border border-white/[0.06] flex items-center justify-between gap-4"
+                    className="p-4 rounded-xl bg-surface-subtle border border-border-subtle flex items-center justify-between gap-4"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-[#F5F7FA] font-mono">
+                        <span className="font-bold text-sm text-foreground">
                           {loc.custom_name || loc.city}
                         </span>
                         {loc.is_primary && (
-                          <Badge variant="cyan" size="sm" className="text-[10px] flex items-center gap-1">
+                          <Badge variant="good" size="sm" className="text-[10px] flex items-center gap-1">
                             <Star className="w-3 h-3 fill-current" /> PRIMARY
                           </Badge>
                         )}
                       </div>
-                      <div className="text-xs font-mono text-[#A5B0BC]">
+                      <div className="text-xs text-foreground-secondary">
                         {loc.city}, {loc.country}
                         {loc.latest_aqi !== null && loc.latest_aqi !== undefined && (
-                          <span className="ml-3 text-[#28C7F5]">
+                          <span className="ml-3 text-primary">
                             Latest AQI: <strong>{loc.latest_aqi}</strong> ({loc.latest_category || "Standard"})
                           </span>
                         )}
@@ -727,13 +724,13 @@ function ProfileContent() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleSetPrimary(loc.id)}
-                          className="h-8 text-xs font-mono border-white/10 hover:border-white/20"
+                          className="h-8 text-xs border-border-subtle hover:bg-surface-hover"
                         >
                           Make Primary
                         </Button>
                       )}
                       <Link href={`/dashboard?city=${encodeURIComponent(loc.city || "")}`}>
-                        <Button variant="ghost" size="sm" className="h-8 px-2 text-xs font-mono text-[#28C7F5]">
+                        <Button variant="ghost" size="sm" className="h-8 px-2 text-xs text-primary">
                           View
                         </Button>
                       </Link>
@@ -741,7 +738,7 @@ function ProfileContent() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteSavedLocation(loc.id)}
-                        className="h-8 w-8 p-0 text-[#6B7A8D] hover:text-red-400"
+                        className="h-8 w-8 p-0 text-foreground-muted hover:text-rose-500"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
@@ -756,62 +753,62 @@ function ProfileContent() {
 
       {/* TAB 4: NOTIFICATIONS & QUIET HOURS */}
       {activeTab === "notifications" && preferences && (
-        <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-6">
-          <div className="pb-3 border-b border-white/[0.06]">
-            <h3 className="text-base font-bold font-mono text-[#F5F7FA] flex items-center gap-2">
-              <Bell className="w-4 h-4 text-[#28C7F5]" /> Alert Channels & Quiet Hours Policy
+        <Card className="p-6 bg-surface border-border-subtle space-y-6">
+          <div className="pb-3 border-b border-border-subtle">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              <Bell className="w-4 h-4 text-primary" /> Alert Channels & Quiet Hours Policy
             </h3>
-            <p className="text-xs font-mono text-[#A5B0BC] mt-1">
+            <p className="text-xs text-foreground-secondary mt-1">
               Configure dispatch destinations and specify uninterrupted sleeping windows during which non-critical alerts are suppressed.
             </p>
           </div>
 
           <form onSubmit={handlePreferencesSubmit} className="space-y-6">
             <div className="space-y-4">
-              <h4 className="text-xs font-bold font-mono uppercase text-[#F5F7FA] tracking-wider">
+              <h4 className="text-xs font-bold uppercase text-foreground tracking-wider">
                 Notification Delivery Channels
               </h4>
               <div className="space-y-3">
-                <label className="flex items-start gap-3 p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06] cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 rounded-lg bg-surface-subtle border border-border-subtle cursor-pointer">
                   <input
                     type="checkbox"
                     checked={preferences.in_app_notifications}
                     onChange={(e) => setPreferences({ ...preferences, in_app_notifications: e.target.checked })}
-                    className="mt-1 rounded border-white/20 bg-[#080A0D] text-[#28C7F5]"
+                    className="mt-1 rounded border-border-subtle bg-surface accent-primary"
                   />
                   <div>
-                    <div className="text-xs font-bold font-mono text-[#F5F7FA]">In-App Notification Center</div>
-                    <div className="text-[11px] font-mono text-[#A5B0BC]">
+                    <div className="text-xs font-bold text-foreground">In-App Notification Center</div>
+                    <div className="text-[11px] text-foreground-secondary">
                       Persistent alert inbox in the application navbar with live unread badge counters.
                     </div>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06] cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 rounded-lg bg-surface-subtle border border-border-subtle cursor-pointer">
                   <input
                     type="checkbox"
                     checked={preferences.email_notifications}
                     onChange={(e) => setPreferences({ ...preferences, email_notifications: e.target.checked })}
-                    className="mt-1 rounded border-white/20 bg-[#080A0D] text-[#28C7F5]"
+                    className="mt-1 rounded border-border-subtle bg-surface accent-primary"
                   />
                   <div>
-                    <div className="text-xs font-bold font-mono text-[#F5F7FA]">Email Alert Directives (Opt-In)</div>
-                    <div className="text-[11px] font-mono text-[#A5B0BC]">
+                    <div className="text-xs font-bold text-foreground">Email Alert Directives (Opt-In)</div>
+                    <div className="text-[11px] text-foreground-secondary">
                       Receive automated emails when hazardous environmental events occur.
                     </div>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3.5 rounded-lg bg-[#10151B] border border-white/[0.06] cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 rounded-lg bg-surface-subtle border border-border-subtle cursor-pointer">
                   <input
                     type="checkbox"
                     checked={preferences.push_notifications}
                     onChange={(e) => setPreferences({ ...preferences, push_notifications: e.target.checked })}
-                    className="mt-1 rounded border-white/20 bg-[#080A0D] text-[#28C7F5]"
+                    className="mt-1 rounded border-border-subtle bg-surface accent-primary"
                   />
                   <div>
-                    <div className="text-xs font-bold font-mono text-[#F5F7FA]">Browser Web Push Notifications</div>
-                    <div className="text-[11px] font-mono text-[#A5B0BC]">
+                    <div className="text-xs font-bold text-foreground">Browser Web Push Notifications</div>
+                    <div className="text-[11px] text-foreground-secondary">
                       Receive instant desktop or mobile push banners for high-severity alerts.
                     </div>
                   </div>
@@ -820,13 +817,13 @@ function ProfileContent() {
             </div>
 
             {/* Quiet Hours */}
-            <div className="space-y-4 pt-4 border-t border-white/[0.06]">
+            <div className="space-y-4 pt-4 border-t border-border-subtle">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold font-mono uppercase text-[#F5F7FA] tracking-wider flex items-center gap-1.5">
-                    <VolumeX className="w-3.5 h-3.5 text-[#38E0B4]" /> Quiet Hours Window
+                  <h4 className="text-xs font-bold uppercase text-foreground tracking-wider flex items-center gap-1.5">
+                    <VolumeX className="w-3.5 h-3.5 text-emerald-500" /> Quiet Hours Window
                   </h4>
-                  <p className="text-[11px] font-mono text-[#A5B0BC] mt-0.5">
+                  <p className="text-[11px] text-foreground-secondary mt-0.5">
                     During quiet hours, routine advisories are kept silent in the in-app center without sounding push or email alerts.
                   </p>
                 </div>
@@ -834,36 +831,36 @@ function ProfileContent() {
                   type="checkbox"
                   checked={preferences.quiet_hours_enabled}
                   onChange={(e) => setPreferences({ ...preferences, quiet_hours_enabled: e.target.checked })}
-                  className="rounded border-white/20 bg-[#10151B] text-[#38E0B4] scale-125"
+                  className="rounded border-border-subtle bg-surface accent-primary scale-125"
                 />
               </div>
 
               {preferences.quiet_hours_enabled && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-[#10151B] border border-white/[0.04]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-surface-subtle border border-border-subtle">
                   <div>
-                    <label className="block text-xs font-mono text-[#A5B0BC] mb-1">Quiet Hours Begin (24h)</label>
+                    <label className="block text-xs font-semibold text-foreground-secondary mb-1">Quiet Hours Begin (24h)</label>
                     <input
                       type="time"
                       value={preferences.quiet_hours_start}
                       onChange={(e) => setPreferences({ ...preferences, quiet_hours_start: e.target.value })}
-                      className="w-full bg-[#080A0D] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA]"
+                      className="w-full bg-surface border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono text-[#A5B0BC] mb-1">Quiet Hours End (24h)</label>
+                    <label className="block text-xs font-semibold text-foreground-secondary mb-1">Quiet Hours End (24h)</label>
                     <input
                       type="time"
                       value={preferences.quiet_hours_end}
                       onChange={(e) => setPreferences({ ...preferences, quiet_hours_end: e.target.value })}
-                      className="w-full bg-[#080A0D] border border-white/[0.1] rounded-lg px-3 py-2 text-xs font-mono text-[#F5F7FA]"
+                      className="w-full bg-surface border border-border-subtle rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-white/[0.06]">
-              <Button type="submit" disabled={prefLoading} className="font-mono text-xs bg-[#28C7F5] hover:bg-[#28C7F5]/90 text-black">
+            <div className="flex justify-end pt-4 border-t border-border-subtle">
+              <Button type="submit" variant="primary" disabled={prefLoading}>
                 {prefLoading ? "Saving Settings..." : "Save Notification Preferences"}
               </Button>
             </div>

@@ -28,6 +28,9 @@ import {
   ShieldAlert,
   Map as MapIcon,
   Navigation,
+  Home,
+  Users,
+  ArrowRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -710,6 +713,54 @@ function DashboardContent() {
           </div>
         </Card>
       )}
+      {/* 7. NEW ENVIRONMENTAL INTELLIGENCE MODULES */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6 bg-surface border-border-subtle flex flex-col justify-between space-y-4 hover:border-primary/40 transition-all">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <Home className="w-5 h-5" />
+              </div>
+              <Badge variant="good" size="sm">Smart Assessment</Badge>
+            </div>
+            <h3 className="font-bold text-base text-foreground">Indoor Air Quality</h3>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Diagnose ventilation deficits, cooking emissions, and mold hazards in bedrooms, kitchens, and offices. Receive personalized mitigation guidance powered by Gemini AI.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link href="/indoor">
+              <Button variant="primary" size="sm" className="w-full text-xs justify-between">
+                <span>Assess Indoor Space</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
+        <Card className="p-6 bg-surface border-border-subtle flex flex-col justify-between space-y-4 hover:border-primary/40 transition-all">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <Users className="w-5 h-5" />
+              </div>
+              <Badge variant="good" size="sm">Citizen Network</Badge>
+            </div>
+            <h3 className="font-bold text-base text-foreground">Community Insights</h3>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Explore citizen-reported localized pollution incidents, track verified industrial and waste-burning hotspots on the interactive map, and join collective clean-air action plans.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link href="/community">
+              <Button variant="primary" size="sm" className="w-full text-xs justify-between">
+                <span>Explore Community Hotspots</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

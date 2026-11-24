@@ -24,26 +24,61 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("airwise_user");
+        if (cached) return JSON.parse(cached);
+      } catch {}
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        // If we already have a cached token/user, initial loading is fast
+        return !localStorage.getItem("airwise_token");
+      } catch {}
+    }
+    return true;
+  });
+
+  const persistUser = (u: User | null) => {
+    setUser(u);
+    if (typeof window !== "undefined") {
+      try {
+        if (u) {
+          localStorage.setItem("airwise_user", JSON.stringify(u));
+        } else {
+          localStorage.removeItem("airwise_user");
+        }
+      } catch {}
+    }
+  };
 
   // Restore authenticated session on application mount
   const restoreSession = useCallback(async () => {
     try {
       const res = await ApiClient.getMe();
       if (res.success && res.data) {
-        setUser(res.data);
+        persistUser(res.data);
       } else {
         // If /me failed, try refreshing session from cookie
         const refreshRes = await ApiClient.refreshSession().catch(() => null);
         if (refreshRes?.success && refreshRes.data?.user) {
-          setUser(refreshRes.data.user);
+          persistUser(refreshRes.data.user);
         } else {
-          setUser(null);
+          // Only clear if refresh genuinely failed and no valid session exists
+          if (!ApiClient.getAccessToken()) {
+            persistUser(null);
+          }
         }
       }
     } catch {
-      setUser(null);
+      // If network fails (e.g. offline), retain cached user rather than kicking out
+      if (!ApiClient.getAccessToken()) {
+        persistUser(null);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await ApiClient.login(payload);
       if (res.success && res.data?.user) {
-        setUser(res.data.user);
+        persistUser(res.data.user);
       }
     } finally {
       setIsLoading(false);
@@ -71,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await ApiClient.register(payload);
       const userObj = res.data?.user;
       if (userObj) {
-        setUser(userObj);
+        persistUser(userObj);
         return userObj;
       }
       throw new Error(res.message || "Registration failed");
@@ -84,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await ApiClient.logout().catch(() => null);
-      setUser(null);
+      persistUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await ApiClient.logoutAll().catch(() => null);
-      setUser(null);
+      persistUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await ApiClient.getMe();
       if (res.success && res.data) {
-        setUser(res.data);
+        persistUser(res.data);
       }
     } catch {
       // Ignored
@@ -114,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (payload: ProfileUpdatePayload): Promise<User> => {
     const res = await ApiClient.updateMe(payload);
     if (res.success && res.data) {
-      setUser(res.data);
+      persistUser(res.data);
       return res.data;
     }
     throw new Error(res.message || "Failed to update profile");

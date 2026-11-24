@@ -89,10 +89,11 @@ export class ApiClient {
     const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${API_BASE_URL}${cleanEndpoint}`;
 
+    const token = this.getAccessToken();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options?.headers as Record<string, string> || {}),
     };
 
