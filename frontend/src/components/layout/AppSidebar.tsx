@@ -9,7 +9,8 @@ import {
   Bot,
   BarChart3,
   Scale,
-  Bell,
+  Home,
+  Users,
   ShieldCheck,
   User,
   LogOut,
@@ -35,7 +36,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "AI Assistant", href: "/assistant", icon: Bot, badge: "Gemini" },
   { label: "Analytics & Trends", href: "/analytics", icon: BarChart3 },
   { label: "Compare Stations", href: "/compare", icon: Scale },
-  { label: "Alerts & Rules", href: "/notifications", icon: Bell },
+  { label: "Indoor Air Quality", href: "/indoor", icon: Home },
+  { label: "Community Insights", href: "/community", icon: Users },
   { label: "Admin Portal", href: "/admin", icon: ShieldCheck, adminOnly: true },
 ];
 

@@ -12,6 +12,8 @@ const APP_ROUTES = [
   "/assistant",
   "/analytics",
   "/compare",
+  "/indoor",
+  "/community",
   "/notifications",
   "/profile",
   "/settings",

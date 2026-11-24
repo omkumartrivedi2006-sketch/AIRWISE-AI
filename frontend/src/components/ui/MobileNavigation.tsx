@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { X, Wind, ArrowRight, UserCheck, ShieldCheck, User, LogOut, LayoutDashboard, Map, BarChart3, Bot, Bell } from "lucide-react";
+import { X, Wind, ArrowRight, UserCheck, ShieldCheck, User, LogOut, LayoutDashboard, Map, BarChart3, Bot, Scale, Home, Users } from "lucide-react";
 import { Button } from "./Button";
 import { Badge } from "./Badge";
 import { ThemeToggle } from "./ThemeToggle";
@@ -39,10 +39,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   const navLinks = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Environmental Analytics", href: "/analytics", icon: BarChart3 },
     { label: "Pollution Map", href: "/map", icon: Map },
-    { label: "AI Pollution Assistant", href: "/assistant", icon: Bot },
-    { label: "Alerts & Notifications", href: "/notifications", icon: Bell },
+    { label: "AI Assistant", href: "/assistant", icon: Bot },
+    { label: "Analytics & Trends", href: "/analytics", icon: BarChart3 },
+    { label: "Compare Stations", href: "/compare", icon: Scale },
+    { label: "Indoor Air Quality", href: "/indoor", icon: Home },
+    { label: "Community Insights", href: "/community", icon: Users },
   ];
 
   return (

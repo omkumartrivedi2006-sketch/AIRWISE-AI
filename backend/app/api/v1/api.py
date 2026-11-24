@@ -10,9 +10,11 @@ from app.api.v1.endpoints import (
     alerts,
     analytics,
     auth,
+    community,
     conversations,
     feedback,
     health,
+    indoor_air,
     locations,
     map as map_endpoint,
     messages,
@@ -69,6 +71,12 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 
 # 14. Personalized Recommendations (Module 08)
 api_router.include_router(recommendations.router, prefix="/recommendations", tags=["Personalized Recommendations"])
+
+# 16. Indoor Air Quality (Module 10)
+api_router.include_router(indoor_air.router, prefix="/indoor", tags=["Indoor Air Quality"])
+
+# 17. Community Insights & Pollution Reporting (Module 11)
+api_router.include_router(community.router, prefix="/community", tags=["Community Insights"])
 
 # 15. Platform Administration & Monitoring (Module 09)
 api_router.include_router(admin_router, prefix="/admin")

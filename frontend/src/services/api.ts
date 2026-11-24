@@ -953,4 +953,90 @@ export class ApiClient {
     if (params?.limit) q.append("limit", params.limit.toString());
     return this.request<import("@/types").AdminAuditLog[]>(`/admin/audit-logs?${q.toString()}`);
   }
+
+  // ==========================================
+  // Indoor Air Quality (Module 10)
+  // ==========================================
+  public static async submitIndoorAssessment(
+    data: import("@/types").IndoorAssessmentCreatePayload
+  ): Promise<ApiResponse<import("@/types").IndoorAssessment>> {
+    return this.request<import("@/types").IndoorAssessment>("/indoor/assessments", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async getIndoorAssessments(
+    limit = 20
+  ): Promise<ApiResponse<import("@/types").IndoorAssessment[]>> {
+    return this.request<import("@/types").IndoorAssessment[]>(`/indoor/assessments?limit=${limit}`);
+  }
+
+  public static async getLatestIndoorAssessment(): Promise<ApiResponse<import("@/types").IndoorAssessment | null>> {
+    return this.request<import("@/types").IndoorAssessment | null>("/indoor/assessments/latest");
+  }
+
+  public static async consultIndoorAi(
+    data: import("@/types").IndoorAIAdviceRequest
+  ): Promise<ApiResponse<import("@/types").IndoorAIAdviceResponse>> {
+    return this.request<import("@/types").IndoorAIAdviceResponse>("/indoor/ai-consult", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ==========================================
+  // Community Insights (Module 11)
+  // ==========================================
+  public static async getCommunityOverview(): Promise<ApiResponse<import("@/types").CommunityOverviewStats>> {
+    return this.request<import("@/types").CommunityOverviewStats>("/community/overview");
+  }
+
+  public static async getCommunityReports(params?: {
+    category?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ApiResponse<import("@/types").CommunityReport[]>> {
+    const q = new URLSearchParams();
+    if (params?.category) q.append("category", params.category);
+    if (params?.status) q.append("status", params.status);
+    if (params?.limit) q.append("limit", params.limit.toString());
+    if (params?.offset) q.append("offset", params.offset.toString());
+    const qs = q.toString() ? `?${q.toString()}` : "";
+    return this.request<import("@/types").CommunityReport[]>(`/community/reports${qs}`);
+  }
+
+  public static async submitCommunityReport(
+    data: import("@/types").CommunityReportCreatePayload
+  ): Promise<ApiResponse<import("@/types").CommunityReport>> {
+    return this.request<import("@/types").CommunityReport>("/community/reports", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async getMyCommunityReports(): Promise<ApiResponse<import("@/types").CommunityReport[]>> {
+    return this.request<import("@/types").CommunityReport[]>("/community/reports/my");
+  }
+
+  public static async getCommunityReport(
+    id: number
+  ): Promise<ApiResponse<import("@/types").CommunityReport>> {
+    return this.request<import("@/types").CommunityReport>(`/community/reports/${id}`);
+  }
+
+  public static async updateCommunityReportStatus(
+    id: number,
+    data: import("@/types").CommunityReportStatusUpdatePayload
+  ): Promise<ApiResponse<import("@/types").CommunityReport>> {
+    return this.request<import("@/types").CommunityReport>(`/community/reports/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  public static async getCommunityAiInsights(): Promise<ApiResponse<import("@/types").CommunityAIInsights>> {
+    return this.request<import("@/types").CommunityAIInsights>("/community/ai-insights");
+  }
 }

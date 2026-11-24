@@ -20,6 +20,8 @@ from app.models.notification import Notification, PushSubscription
 from app.models.recommendation import RecommendationCache
 from app.models.audit_log import AuditLog
 from app.models.environmental_review import EnvironmentalDataReview
+from app.models.indoor_air import IndoorAssessment
+from app.models.community_report import CommunityReport
 
 __all__ = [
     "Base",
@@ -41,4 +43,6 @@ __all__ = [
     "RecommendationCache",
     "AuditLog",
     "EnvironmentalDataReview",
+    "IndoorAssessment",
+    "CommunityReport",
 ]

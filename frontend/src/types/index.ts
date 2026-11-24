@@ -751,3 +751,133 @@ export interface AdminAuditLog {
   user_agent?: string | null;
   created_at: string;
 }
+
+// ==========================================
+// Indoor Air Quality Types (Module 10)
+// ==========================================
+export interface IndoorSensorReadings {
+  pm25?: number;
+  pm10?: number;
+  co2?: number;
+  temperature?: number;
+  humidity?: number;
+}
+
+export interface IndoorAssessment {
+  id: number;
+  user_id: number;
+  room_type: string;
+  room_name: string;
+  ventilation: string;
+  cooking_fuel: string;
+  smoking_exposure: boolean;
+  air_purifier: boolean;
+  dust_or_smoke: boolean;
+  mold_dampness: boolean;
+  occupants: number;
+  sensor_readings?: IndoorSensorReadings | null;
+  risk_score: number;
+  risk_level: string;
+  identified_sources: string[];
+  risk_factors: string[];
+  recommendations: string[];
+  ventilation_tips: string[];
+  priority_actions: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IndoorAssessmentCreatePayload {
+  room_type: string;
+  room_name?: string;
+  ventilation: string;
+  cooking_fuel: string;
+  smoking_exposure: boolean;
+  air_purifier: boolean;
+  dust_or_smoke: boolean;
+  mold_dampness: boolean;
+  occupants: number;
+  sensor_readings?: IndoorSensorReadings | null;
+}
+
+export interface IndoorAIAdviceRequest {
+  question: string;
+  room_type?: string;
+  assessment_id?: number;
+}
+
+export interface IndoorAIAdviceResponse {
+  explanation: string;
+  action_steps: string[];
+  daily_routine: string[];
+  weekly_maintenance: string[];
+  model: string;
+  disclaimer: string;
+}
+
+// ==========================================
+// Community Insights Types (Module 11)
+// ==========================================
+export interface CommunityReport {
+  id: number;
+  reference_id: string;
+  user_name: string;
+  category: string;
+  title: string;
+  description: string;
+  location_name: string;
+  latitude: number;
+  longitude: number;
+  incident_time: string;
+  severity: "minor" | "moderate" | "severe";
+  image_url?: string | null;
+  status: "SUBMITTED" | "UNDER_REVIEW" | "VERIFIED" | "REJECTED" | "RESOLVED";
+  moderation_notes?: string | null;
+  upvotes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommunityReportCreatePayload {
+  category: string;
+  title: string;
+  description: string;
+  location_name: string;
+  latitude: number;
+  longitude: number;
+  incident_time?: string;
+  severity?: "minor" | "moderate" | "severe";
+  image_url?: string;
+}
+
+export interface CommunityReportStatusUpdatePayload {
+  status: string;
+  moderation_notes?: string;
+}
+
+export interface CommunityOverviewStats {
+  total_reports: number;
+  verified_reports: number;
+  under_review: number;
+  resolved_reports: number;
+  category_counts: Record<string, number>;
+  nearby_stations: Array<{
+    id: number;
+    name: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+    station_code: string;
+    is_official: boolean;
+  }>;
+}
+
+export interface CommunityAIInsights {
+  reporting_period: string;
+  total_analyzed: number;
+  top_reported_categories: string[];
+  identified_hotspots: string[];
+  summary: string;
+  community_actions: string[];
+  disclaimer: string;
+}
