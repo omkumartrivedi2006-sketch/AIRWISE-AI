@@ -428,13 +428,13 @@ function IndoorAirContent() {
                       room_name: e.target.value.replace("_", " ").toUpperCase(),
                     })
                   }
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                 >
-                  <option value="bedroom">Bedroom</option>
-                  <option value="living_room">Living Room</option>
-                  <option value="kitchen">Kitchen</option>
-                  <option value="office">Office / Study Room</option>
-                  <option value="other">Other Indoor Space</option>
+                  <option value="bedroom" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Bedroom</option>
+                  <option value="living_room" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Living Room</option>
+                  <option value="kitchen" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Kitchen</option>
+                  <option value="office" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Office / Study Room</option>
+                  <option value="other" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Other Indoor Space</option>
                 </select>
               </div>
 
@@ -446,11 +446,11 @@ function IndoorAirContent() {
                 <select
                   value={formData.ventilation}
                   onChange={(e) => setFormData({ ...formData, ventilation: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                 >
-                  <option value="poor">Poor (Closed windows, no airflow, stale smell)</option>
-                  <option value="moderate">Moderate (Single window, partial natural draft)</option>
-                  <option value="good">Good (Cross-ventilation, operable exterior windows)</option>
+                  <option value="poor" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Poor (Closed windows, no airflow, stale smell)</option>
+                  <option value="moderate" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Moderate (Single window, partial natural draft)</option>
+                  <option value="good" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Good (Cross-ventilation, operable exterior windows)</option>
                 </select>
               </div>
 
@@ -462,13 +462,13 @@ function IndoorAirContent() {
                 <select
                   value={formData.cooking_fuel}
                   onChange={(e) => setFormData({ ...formData, cooking_fuel: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                 >
-                  <option value="lpg">LPG Gas Cylinder / Piped Natural Gas</option>
-                  <option value="electricity">Electric Induction / Ceramic</option>
-                  <option value="biomass">Biomass / Wood / Coal Chulha</option>
-                  <option value="other">Other Fuel Type</option>
-                  <option value="na">Not Applicable (Far from cooking area)</option>
+                  <option value="lpg" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">LPG Gas Cylinder / Piped Natural Gas</option>
+                  <option value="electricity" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Electric Induction / Ceramic</option>
+                  <option value="biomass" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Biomass / Wood / Coal Chulha</option>
+                  <option value="other" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Other Fuel Type</option>
+                  <option value="na" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Not Applicable (Far from cooking area)</option>
                 </select>
               </div>
 
@@ -599,7 +599,7 @@ function IndoorAirContent() {
                   max="30"
                   value={formData.occupants}
                   onChange={(e) => setFormData({ ...formData, occupants: parseInt(e.target.value) || 1 })}
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                 />
               </div>
 
@@ -636,7 +636,7 @@ function IndoorAirContent() {
                       placeholder="e.g. 35"
                       value={sensorValues.pm25}
                       onChange={(e) => setSensorValues({ ...sensorValues, pm25: e.target.value })}
-                      className="w-full px-2.5 py-1.5 text-xs rounded bg-surface border border-border-subtle text-foreground"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
                   <div>
@@ -646,7 +646,7 @@ function IndoorAirContent() {
                       placeholder="e.g. 70"
                       value={sensorValues.pm10}
                       onChange={(e) => setSensorValues({ ...sensorValues, pm10: e.target.value })}
-                      className="w-full px-2.5 py-1.5 text-xs rounded bg-surface border border-border-subtle text-foreground"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
                   <div>
@@ -656,7 +656,7 @@ function IndoorAirContent() {
                       placeholder="e.g. 800"
                       value={sensorValues.co2}
                       onChange={(e) => setSensorValues({ ...sensorValues, co2: e.target.value })}
-                      className="w-full px-2.5 py-1.5 text-xs rounded bg-surface border border-border-subtle text-foreground"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
                   <div>
@@ -666,7 +666,7 @@ function IndoorAirContent() {
                       placeholder="e.g. 24"
                       value={sensorValues.temperature}
                       onChange={(e) => setSensorValues({ ...sensorValues, temperature: e.target.value })}
-                      className="w-full px-2.5 py-1.5 text-xs rounded bg-surface border border-border-subtle text-foreground"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
                   <div>
@@ -676,7 +676,7 @@ function IndoorAirContent() {
                       placeholder="e.g. 50"
                       value={sensorValues.humidity}
                       onChange={(e) => setSensorValues({ ...sensorValues, humidity: e.target.value })}
-                      className="w-full px-2.5 py-1.5 text-xs rounded bg-surface border border-border-subtle text-foreground"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
                 </div>
@@ -789,7 +789,7 @@ function IndoorAirContent() {
             onChange={(e) => setAiQuestion(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAskAI()}
             placeholder="Type an indoor air quality question (e.g. How to vent kitchen without letting outside dust in?)..."
-            className="flex-grow px-3.5 py-2.5 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground focus:outline-none focus:border-primary"
+            className="flex-grow px-3.5 py-2.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
           />
           <Button
             variant="primary"

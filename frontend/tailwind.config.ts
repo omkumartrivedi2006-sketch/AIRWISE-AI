@@ -20,6 +20,7 @@ const config: Config = {
           DEFAULT: "var(--background-card)",
           card: "var(--background-card)",
           hover: "var(--background-card-hover)",
+          subtle: "var(--background-secondary)",
           border: "var(--border-subtle)",
           sidebar: "var(--surface-sidebar)",
           sidebarHover: "var(--surface-sidebar-hover)",

@@ -67,6 +67,31 @@
     border-color: var(--border-subtle);
   }
 
+  /* Form Elements Dark/Light Consistency */
+  select, input, textarea {
+    color-scheme: light;
+    background-color: var(--background-card);
+    color: var(--foreground);
+    border-color: var(--border-subtle);
+  }
+
+  .dark select, .dark input, .dark textarea {
+    color-scheme: dark;
+    background-color: #0A0D0B;
+    color: #F9FAFB;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  select option {
+    background-color: #FFFFFF;
+    color: #111827;
+  }
+
+  .dark select option {
+    background-color: #0A0D0B;
+    color: #F9FAFB;
+  }
+
   html {
     scroll-behavior: smooth;
   }

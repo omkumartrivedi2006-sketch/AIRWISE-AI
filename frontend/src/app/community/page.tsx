@@ -476,15 +476,15 @@ function CommunityContent() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-2.5 py-1 text-xs rounded bg-surface border border-border-subtle text-foreground"
+            className="px-2.5 py-1 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
           >
-            <option value="all">All Categories</option>
-            <option value="open_waste_burning">Open Waste Burning</option>
-            <option value="industrial_smoke">Industrial Smoke</option>
-            <option value="construction_dust">Construction Dust</option>
-            <option value="vehicle_emissions">Vehicle Emissions</option>
-            <option value="garbage_burning">Garbage Burning</option>
-            <option value="unusual_odor">Unusual Odor</option>
+            <option value="all" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">All Categories</option>
+            <option value="open_waste_burning" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Open Waste Burning</option>
+            <option value="industrial_smoke" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Industrial Smoke</option>
+            <option value="construction_dust" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Construction Dust</option>
+            <option value="vehicle_emissions" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Vehicle Emissions</option>
+            <option value="garbage_burning" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Garbage Burning</option>
+            <option value="unusual_odor" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Unusual Odor</option>
           </select>
         </div>
       </div>
@@ -904,16 +904,16 @@ function CommunityContent() {
                   <select
                     value={reportForm.category}
                     onChange={(e) => setReportForm({ ...reportForm, category: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground"
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                   >
-                    <option value="open_waste_burning">Open Waste Burning</option>
-                    <option value="industrial_smoke">Industrial Smoke</option>
-                    <option value="construction_dust">Construction Dust</option>
-                    <option value="vehicle_emissions">Vehicle Emissions</option>
-                    <option value="road_dust">Road Dust</option>
-                    <option value="garbage_burning">Garbage Burning</option>
-                    <option value="unusual_odor">Unusual Smoke or Odor</option>
-                    <option value="other">Other Concern</option>
+                    <option value="open_waste_burning" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Open Waste Burning</option>
+                    <option value="industrial_smoke" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Industrial Smoke</option>
+                    <option value="construction_dust" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Construction Dust</option>
+                    <option value="vehicle_emissions" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Vehicle Emissions</option>
+                    <option value="road_dust" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Road Dust</option>
+                    <option value="garbage_burning" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Garbage Burning</option>
+                    <option value="unusual_odor" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Unusual Smoke or Odor</option>
+                    <option value="other" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Other Concern</option>
                   </select>
                 </div>
 
@@ -925,7 +925,7 @@ function CommunityContent() {
                     placeholder="e.g. Heavy tire burning near ring road flyover"
                     value={reportForm.title}
                     onChange={(e) => setReportForm({ ...reportForm, title: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground"
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                   />
                 </div>
 
@@ -937,7 +937,7 @@ function CommunityContent() {
                     placeholder="Provide details about smoke density, smell, duration, or active works..."
                     value={reportForm.description}
                     onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground"
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                   />
                 </div>
 
@@ -950,7 +950,7 @@ function CommunityContent() {
                       placeholder="e.g. SG Highway, Bodakdev"
                       value={reportForm.location_name}
                       onChange={(e) => setReportForm({ ...reportForm, location_name: e.target.value })}
-                      className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground"
+                      className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
 
@@ -961,11 +961,11 @@ function CommunityContent() {
                       onChange={(e) =>
                         setReportForm({ ...reportForm, severity: e.target.value as any })
                       }
-                      className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground"
+                      className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     >
-                      <option value="minor">Minor (Low smoke / localized)</option>
-                      <option value="moderate">Moderate (Noticeable haze)</option>
-                      <option value="severe">Severe (Dense acrid smoke)</option>
+                      <option value="minor" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Minor (Low smoke / localized)</option>
+                      <option value="moderate" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Moderate (Noticeable haze)</option>
+                      <option value="severe" className="bg-white dark:bg-[#0A0D0B] text-gray-900 dark:text-gray-100">Severe (Dense acrid smoke)</option>
                     </select>
                   </div>
                 </div>
@@ -990,7 +990,7 @@ function CommunityContent() {
                       onChange={(e) =>
                         setReportForm({ ...reportForm, latitude: parseFloat(e.target.value) || 0 })
                       }
-                      className="px-3 py-1.5 text-xs rounded bg-surface-subtle border border-border-subtle text-foreground"
+                      className="px-3 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                     <input
                       type="number"
@@ -1000,7 +1000,7 @@ function CommunityContent() {
                       onChange={(e) =>
                         setReportForm({ ...reportForm, longitude: parseFloat(e.target.value) || 0 })
                       }
-                      className="px-3 py-1.5 text-xs rounded bg-surface-subtle border border-border-subtle text-foreground"
+                      className="px-3 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     />
                   </div>
                 </div>
@@ -1012,7 +1012,7 @@ function CommunityContent() {
                     placeholder="https://example.com/photo.jpg"
                     value={reportForm.image_url}
                     onChange={(e) => setReportForm({ ...reportForm, image_url: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface-subtle border border-border-subtle text-foreground"
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                   />
                 </div>
 
