@@ -55,6 +55,11 @@ export interface PollutionObservationItem {
   observed_at: string;
   created_at: string;
   location?: LocationItem;
+  location_name?: string;
+  city?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface LocationSearchResult {

@@ -11,6 +11,7 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
     | "moderate"
     | "sensitive"
     | "unhealthy"
+    | "poor"
     | "veryUnhealthy"
     | "hazardous";
   size?: "sm" | "md" | "lg";
@@ -51,6 +52,8 @@ export const Badge: React.FC<BadgeProps> = ({
     sensitive:
       "bg-orange-500/10 text-orange-800 dark:text-orange-300 border border-orange-500/30 font-semibold",
     unhealthy:
+      "bg-red-500/10 text-red-800 dark:text-red-300 border border-red-500/30 font-semibold",
+    poor:
       "bg-red-500/10 text-red-800 dark:text-red-300 border border-red-500/30 font-semibold",
     veryUnhealthy:
       "bg-purple-500/10 text-purple-800 dark:text-purple-300 border border-purple-500/30 font-semibold",

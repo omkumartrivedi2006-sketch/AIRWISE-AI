@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import type { Map as LeafletMap, LayerGroup } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   Users,
@@ -99,8 +100,8 @@ function CommunityContent() {
 
   // Leaflet Map References
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersLayerRef = useRef<any>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const markersLayerRef = useRef<LayerGroup | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
   const loadData = async () => {
@@ -173,6 +174,7 @@ function CommunityContent() {
 
     import("leaflet").then((L) => {
       const markersLayer = markersLayerRef.current;
+      if (!markersLayer) return;
       markersLayer.clearLayers();
 
       // 1. Render Official Monitoring Stations (Cyan Badge)
@@ -978,7 +980,10 @@ function CommunityContent() {
                       id="report-severity"
                       value={reportForm.severity}
                       onChange={(e) =>
-                        setReportForm({ ...reportForm, severity: e.target.value as any })
+                        setReportForm({
+                          ...reportForm,
+                          severity: e.target.value as CommunityReportCreatePayload["severity"],
+                        })
                       }
                       className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
                     >

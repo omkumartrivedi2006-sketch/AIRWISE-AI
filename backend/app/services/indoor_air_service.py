@@ -4,7 +4,6 @@ Performs risk analysis, source identification, personalized guidance,
 and AI-assisted indoor environmental intelligence.
 """
 
-import random
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from app.models.indoor_air import IndoorAssessment

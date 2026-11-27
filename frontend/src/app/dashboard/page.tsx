@@ -239,11 +239,11 @@ function DashboardContent() {
         const aqiVal = d.aqi ?? 0;
         const display: DisplayObservation = {
           location_id: d.location_id,
-          name: (d as any).location_name || d.location?.name || d.location?.city || params.city || "Monitored Station",
-          city: (d as any).city || d.location?.city || params.city || "Detected Location",
-          country: (d as any).country || d.location?.country || "Global Network",
-          latitude: (d as any).latitude ?? d.location?.latitude ?? params.lat ?? 0,
-          longitude: (d as any).longitude ?? d.location?.longitude ?? params.lon ?? 0,
+          name: d.location_name || d.location?.name || d.location?.city || params.city || "Monitored Station",
+          city: d.city || d.location?.city || params.city || "Detected Location",
+          country: d.country || d.location?.country || "Global Network",
+          latitude: d.latitude ?? d.location?.latitude ?? params.lat ?? 0,
+          longitude: d.longitude ?? d.location?.longitude ?? params.lon ?? 0,
           aqi: aqiVal,
           aqi_scale: d.aqi_scale || "US_EPA",
           category: (d.aqi_category as DisplayObservation["category"]) || determineCategory(aqiVal),

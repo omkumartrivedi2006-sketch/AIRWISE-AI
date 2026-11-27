@@ -119,7 +119,7 @@ class RecommendationService:
         source_name = "deterministic_rule_engine"
 
         # Try Gemini if operational
-        is_gemini_active = getattr(gemini_provider, "is_available", lambda: False)()
+        is_gemini_active = gemini_provider.is_available()
         if is_gemini_active and settings.RECOMMENDATIONS_ENABLED and latest_obs:
             try:
                 items = await cls._generate_gemini_recommendations(user, city_name, latest_obs, interests)

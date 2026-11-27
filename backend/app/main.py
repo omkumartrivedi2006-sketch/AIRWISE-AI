@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.api.v1.endpoints import auth
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.exceptions import (
@@ -50,11 +51,10 @@ async def lifespan(app: FastAPI):
 
 def create_application() -> FastAPI:
     """FastAPI application factory."""
-    # Toggle interactive documentation according to configuration
-    docs_enabled = settings.ENABLE_DOCS if not settings.is_production else (settings.ENABLE_DOCS and not settings.is_production)
-    openapi_url = f"{settings.API_V1_PREFIX}/openapi.json" if settings.ENABLE_DOCS else None
-    docs_url = f"{settings.API_V1_PREFIX}/docs" if settings.ENABLE_DOCS else None
-    redoc_url = f"{settings.API_V1_PREFIX}/redoc" if settings.ENABLE_DOCS else None
+    docs_enabled = settings.ENABLE_DOCS and not settings.is_production
+    openapi_url = f"{settings.API_V1_PREFIX}/openapi.json" if docs_enabled else None
+    docs_url = f"{settings.API_V1_PREFIX}/docs" if docs_enabled else None
+    redoc_url = f"{settings.API_V1_PREFIX}/redoc" if docs_enabled else None
 
     app = FastAPI(
         title=settings.APP_NAME,
@@ -102,7 +102,6 @@ def create_application() -> FastAPI:
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
     # Resilient aliases so frontend requests with or without /api/v1 prefix succeed seamlessly
     app.include_router(api_router, prefix="/api")
-    from app.api.v1.endpoints import auth
     app.include_router(auth.router, prefix="/auth", tags=["Auth-Alias"])
 
     # 4. Root Endpoint
