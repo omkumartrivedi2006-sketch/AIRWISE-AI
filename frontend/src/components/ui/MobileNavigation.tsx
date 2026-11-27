@@ -57,7 +57,12 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       />
 
       {/* Slide-in Drawer */}
-      <div className="fixed top-0 right-0 bottom-0 w-full max-w-xs bg-surface border-l border-border-subtle shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile Navigation Menu"
+        className="fixed top-0 right-0 bottom-0 w-full max-w-xs bg-surface border-l border-border-subtle shadow-2xl p-6 flex flex-col justify-between overflow-y-auto"
+      >
         <div>
           {/* Header */}
           <div className="flex items-center justify-between pb-5 border-b border-border-subtle">

@@ -463,7 +463,12 @@ function DashboardContent() {
               <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 ref={searchInputRef}
+                id="dashboard-search-stations"
                 type="text"
+                role="combobox"
+                aria-expanded={showDropdown}
+                aria-autocomplete="list"
+                aria-label="Search Indian city, state, or station"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search Indian city, state, or station (e.g. Ahmedabad, Mumbai, New Delhi)..."
@@ -535,8 +540,10 @@ function DashboardContent() {
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleToggleSaveLocation}
                   disabled={savingLocation}
+                  aria-label={isSaved ? "Remove station from bookmarks" : "Bookmark this station"}
                   className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-all ${isSaved
                     ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
                     : "bg-surface border-border-subtle text-foreground-muted hover:text-foreground"
@@ -553,7 +560,11 @@ function DashboardContent() {
 
             {/* Central AQI Meter Display */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-              <div className="sm:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-background-secondary border border-border-subtle text-center">
+              <div
+                role="status"
+                aria-label={`Current US EPA AQI: ${isLoading ? 'Loading' : currentObs?.aqi}, Category: ${currentObs?.category || 'Unknown'}`}
+                className="sm:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-background-secondary border border-border-subtle text-center"
+              >
                 <span className="text-xs font-mono text-foreground-muted uppercase tracking-wider">
                   US EPA Standard AQI
                 </span>

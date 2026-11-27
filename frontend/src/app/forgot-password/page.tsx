@@ -53,14 +53,14 @@ export default function ForgotPasswordPage() {
 
       <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-5">
         {error && (
-          <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
+          <div role="alert" aria-live="polite" className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {submitted ? (
-          <div className="p-4 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 space-y-3 text-center">
+          <div role="status" className="p-4 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 space-y-3 text-center">
             <CheckCircle2 className="w-8 h-8 text-[#38E0B4] mx-auto" />
             <h3 className="text-sm font-bold text-[#F5F7FA]">Recovery Link Dispatched</h3>
             <p className="text-xs text-[#A5B0BC] leading-relaxed">
@@ -77,12 +77,15 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
+              <label htmlFor="forgot-email" className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-[#28C7F5]" />
                 Registered Email
               </label>
               <input
+                id="forgot-email"
                 type="email"
+                autoComplete="email"
+                aria-required="true"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@example.com"

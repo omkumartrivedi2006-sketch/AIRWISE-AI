@@ -426,8 +426,10 @@ function CommunityContent() {
 
       {/* SECTION 2: Tabs (Map / Feed / My Reports / Admin Moderation) */}
       <div className="flex items-center justify-between border-b border-border-subtle pb-2">
-        <div className="flex gap-2">
+        <div role="tablist" aria-label="Community Insights Views" className="flex gap-2">
           <button
+            role="tab"
+            aria-selected={activeTab === "map"}
             onClick={() => setActiveTab("map")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               activeTab === "map"
@@ -438,6 +440,8 @@ function CommunityContent() {
             Interactive Hotspot Map
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === "feed"}
             onClick={() => setActiveTab("feed")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               activeTab === "feed"
@@ -448,6 +452,8 @@ function CommunityContent() {
             Recent Incident Feed
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === "my_reports"}
             onClick={() => setActiveTab("my_reports")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               activeTab === "my_reports"
@@ -459,6 +465,8 @@ function CommunityContent() {
           </button>
           {user?.role === "ADMIN" && (
             <button
+              role="tab"
+              aria-selected={activeTab === "admin"}
               onClick={() => setActiveTab("admin")}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 activeTab === "admin"
@@ -861,23 +869,33 @@ function CommunityContent() {
 
       {/* REPORT SUBMISSION MODAL */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="community-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setShowModal(false);
+          }}
+        >
           <Card className="max-w-lg w-full p-6 bg-surface border-border-subtle shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
-              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              <h3 id="community-modal-title" className="text-base font-bold text-foreground flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-primary" />
                 Report Pollution Incident
               </h3>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="text-xs text-foreground-muted hover:text-foreground"
+                aria-label="Close modal"
+                className="text-xs text-foreground-muted hover:text-foreground p-1 focus:outline-none focus-visible:text-primary"
               >
                 ✕
               </button>
             </div>
 
             {submissionSuccess ? (
-              <div className="py-6 text-center space-y-3">
+              <div role="status" className="py-6 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 mx-auto flex items-center justify-center">
                   <Check className="w-6 h-6" />
                 </div>
@@ -900,8 +918,9 @@ function CommunityContent() {
             ) : (
               <form onSubmit={handleReportSubmit} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Pollution Category</label>
+                  <label htmlFor="report-category" className="text-xs font-semibold text-foreground">Pollution Category</label>
                   <select
+                    id="report-category"
                     value={reportForm.category}
                     onChange={(e) => setReportForm({ ...reportForm, category: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
@@ -918,8 +937,9 @@ function CommunityContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Short Title</label>
+                  <label htmlFor="report-title" className="text-xs font-semibold text-foreground">Short Title</label>
                   <input
+                    id="report-title"
                     type="text"
                     required
                     placeholder="e.g. Heavy tire burning near ring road flyover"
@@ -930,8 +950,9 @@ function CommunityContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Description</label>
+                  <label htmlFor="report-description" className="text-xs font-semibold text-foreground">Description</label>
                   <textarea
+                    id="report-description"
                     required
                     rows={3}
                     placeholder="Provide details about smoke density, smell, duration, or active works..."
@@ -943,8 +964,9 @@ function CommunityContent() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-foreground">Location Name / Area</label>
+                    <label htmlFor="report-location-name" className="text-xs font-semibold text-foreground">Location Name / Area</label>
                     <input
+                      id="report-location-name"
                       type="text"
                       required
                       placeholder="e.g. SG Highway, Bodakdev"
@@ -955,8 +977,9 @@ function CommunityContent() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-foreground">Severity Level</label>
+                    <label htmlFor="report-severity" className="text-xs font-semibold text-foreground">Severity Level</label>
                     <select
+                      id="report-severity"
                       value={reportForm.severity}
                       onChange={(e) =>
                         setReportForm({ ...reportForm, severity: e.target.value as any })
@@ -972,7 +995,7 @@ function CommunityContent() {
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-foreground">Approximate Coordinates</label>
+                    <span className="text-xs font-semibold text-foreground">Approximate Coordinates</span>
                     <button
                       type="button"
                       onClick={handleDetectLocation}
@@ -982,32 +1005,43 @@ function CommunityContent() {
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="number"
-                      step="any"
-                      placeholder="Latitude"
-                      value={reportForm.latitude}
-                      onChange={(e) =>
-                        setReportForm({ ...reportForm, latitude: parseFloat(e.target.value) || 0 })
-                      }
-                      className="px-3 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
-                    />
-                    <input
-                      type="number"
-                      step="any"
-                      placeholder="Longitude"
-                      value={reportForm.longitude}
-                      onChange={(e) =>
-                        setReportForm({ ...reportForm, longitude: parseFloat(e.target.value) || 0 })
-                      }
-                      className="px-3 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
-                    />
+                    <div>
+                      <label htmlFor="report-lat" className="sr-only">Latitude</label>
+                      <input
+                        id="report-lat"
+                        type="number"
+                        step="any"
+                        placeholder="Latitude"
+                        aria-label="Latitude"
+                        value={reportForm.latitude}
+                        onChange={(e) =>
+                          setReportForm({ ...reportForm, latitude: parseFloat(e.target.value) || 0 })
+                        }
+                        className="w-full px-3 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="report-lon" className="sr-only">Longitude</label>
+                      <input
+                        id="report-lon"
+                        type="number"
+                        step="any"
+                        placeholder="Longitude"
+                        aria-label="Longitude"
+                        value={reportForm.longitude}
+                        onChange={(e) =>
+                          setReportForm({ ...reportForm, longitude: parseFloat(e.target.value) || 0 })
+                        }
+                        className="w-full px-3 py-1.5 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Optional Photo URL</label>
+                  <label htmlFor="report-image-url" className="text-xs font-semibold text-foreground">Optional Photo URL</label>
                   <input
+                    id="report-image-url"
                     type="url"
                     placeholder="https://example.com/photo.jpg"
                     value={reportForm.image_url}

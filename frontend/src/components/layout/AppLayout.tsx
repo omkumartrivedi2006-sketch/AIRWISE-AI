@@ -17,8 +17,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const { user } = useAuth();
 
+  // Close mobile sidebar on Escape key
+  React.useEffect(() => {
+    if (!mobileSidebarOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileSidebarOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileSidebarOpen]);
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background text-foreground">
+      {/* Skip to Main Content Link for Keyboard Users (WCAG 2.4.1) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-50 px-4 py-2 bg-primary text-black font-bold rounded-lg shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      >
+        Skip to main content
+      </a>
+
       {/* Desktop Left-Side Navigation Sidebar */}
       <div className="hidden md:block">
         <AppSidebar />
@@ -29,8 +47,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="p-1.5 rounded-lg border border-border-subtle text-foreground-secondary hover:text-foreground"
+            className="p-1.5 rounded-lg border border-border-subtle text-foreground-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Toggle Navigation Sidebar"
+            aria-expanded={mobileSidebarOpen}
+            aria-controls="mobile-sidebar-drawer"
           >
             {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -46,7 +66,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <ThemeToggle />
           <Link
             href="/profile"
-            className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white dark:text-black font-bold text-xs"
+            aria-label="View user profile"
+            className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white dark:text-black font-bold text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             {user?.full_name ? user.full_name[0].toUpperCase() : "U"}
           </Link>
@@ -55,10 +76,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobile Sidebar Overlay Drawer */}
       {mobileSidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex">
+        <div
+          id="mobile-sidebar-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile Navigation Sidebar"
+          className="md:hidden fixed inset-0 z-50 flex"
+        >
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileSidebarOpen(false)}
+            aria-hidden="true"
           />
           <div className="relative z-10 w-64 bg-surface border-r border-border-subtle h-full overflow-y-auto">
             <AppSidebar />
@@ -67,7 +95,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto focus:outline-none">
         <div className="max-w-7xl mx-auto space-y-6">
           {children}
         </div>

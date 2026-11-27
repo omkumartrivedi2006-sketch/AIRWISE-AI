@@ -865,7 +865,9 @@ function IndoorAirContent() {
               </p>
             </div>
             <button
+              type="button"
               onClick={() => setShowForm(false)}
+              aria-label="Close Questionnaire"
               className="text-xs text-foreground-muted hover:text-foreground p-1"
             >
               Cancel
@@ -876,10 +878,11 @@ function IndoorAirContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Q1: Room Type */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label htmlFor="indoor-room-type" className="text-xs font-semibold text-foreground">
                   1. Room Type
                 </label>
                 <select
+                  id="indoor-room-type"
                   value={formData.room_type}
                   onChange={(e) =>
                     setFormData({
@@ -900,10 +903,11 @@ function IndoorAirContent() {
 
               {/* Q2: Ventilation Condition */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label htmlFor="indoor-ventilation" className="text-xs font-semibold text-foreground">
                   2. Ventilation Condition
                 </label>
                 <select
+                  id="indoor-ventilation"
                   value={formData.ventilation}
                   onChange={(e) => setFormData({ ...formData, ventilation: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
@@ -916,10 +920,11 @@ function IndoorAirContent() {
 
               {/* Q3: Cooking Fuel */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label htmlFor="indoor-cooking-fuel" className="text-xs font-semibold text-foreground">
                   3. Cooking Fuel In / Near Room
                 </label>
                 <select
+                  id="indoor-cooking-fuel"
                   value={formData.cooking_fuel}
                   onChange={(e) => setFormData({ ...formData, cooking_fuel: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-surface dark:bg-[#0A0D0B] border border-border-subtle dark:border-white/10 text-foreground dark:text-[#F9FAFB] focus:outline-none focus:border-primary shadow-sm"
@@ -933,10 +938,10 @@ function IndoorAirContent() {
               </div>
 
               {/* Q4: Smoking Exposure */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+              <fieldset className="space-y-1.5 border-none p-0 m-0">
+                <legend className="text-xs font-semibold text-foreground">
                   4. Indoor Smoking Exposure
-                </label>
+                </legend>
                 <div className="flex gap-4 pt-1">
                   <label className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
                     <input
@@ -959,13 +964,13 @@ function IndoorAirContent() {
                     No (Smoke-free space)
                   </label>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Q5: Air Purifier */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+              <fieldset className="space-y-1.5 border-none p-0 m-0">
+                <legend className="text-xs font-semibold text-foreground">
                   5. Air Purifier Availability
-                </label>
+                </legend>
                 <div className="flex gap-4 pt-1">
                   <label className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
                     <input
@@ -988,13 +993,13 @@ function IndoorAirContent() {
                     No Purifier
                   </label>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Q6: Dust or Visible Smoke */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+              <fieldset className="space-y-1.5 border-none p-0 m-0">
+                <legend className="text-xs font-semibold text-foreground">
                   6. Visible Dust or Settled Smog
-                </label>
+                </legend>
                 <div className="flex gap-4 pt-1">
                   <label className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
                     <input
@@ -1017,13 +1022,13 @@ function IndoorAirContent() {
                     No (Minimal surface dust)
                   </label>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Q7: Dampness or Mold */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+              <fieldset className="space-y-1.5 border-none p-0 m-0">
+                <legend className="text-xs font-semibold text-foreground">
                   7. Dampness or Mold Concerns
-                </label>
+                </legend>
                 <div className="flex gap-4 pt-1">
                   <label className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
                     <input
@@ -1046,14 +1051,15 @@ function IndoorAirContent() {
                     No (Dry interior walls)
                   </label>
                 </div>
-              </div>
+              </fieldset>
 
               {/* Q8: Number of Occupants */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label htmlFor="indoor-occupants" className="text-xs font-semibold text-foreground">
                   8. Regular Occupants Count
                 </label>
                 <input
+                  id="indoor-occupants"
                   type="number"
                   min="1"
                   max="30"
@@ -1065,12 +1071,13 @@ function IndoorAirContent() {
 
               {/* Q9 Toggle: Optional Measured Hardware Sensor */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <span className="text-xs font-semibold text-foreground block">
                   9. Physical Sensor Measurements
-                </label>
+                </span>
                 <div className="pt-1">
-                  <label className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
+                  <label htmlFor="indoor-sensor-toggle" className="flex items-center gap-1.5 text-xs text-foreground cursor-pointer">
                     <input
+                      id="indoor-sensor-toggle"
                       type="checkbox"
                       checked={hasSensorInput}
                       onChange={(e) => setHasSensorInput(e.target.checked)}
@@ -1090,8 +1097,9 @@ function IndoorAirContent() {
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <div>
-                    <label className="text-[10px] text-foreground-muted block mb-1">PM2.5 (µg/m³)</label>
+                    <label htmlFor="sensor-pm25" className="text-[10px] text-foreground-muted block mb-1">PM2.5 (µg/m³)</label>
                     <input
+                      id="sensor-pm25"
                       type="number"
                       placeholder="e.g. 35"
                       value={sensorValues.pm25}
@@ -1100,8 +1108,9 @@ function IndoorAirContent() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-foreground-muted block mb-1">PM10 (µg/m³)</label>
+                    <label htmlFor="sensor-pm10" className="text-[10px] text-foreground-muted block mb-1">PM10 (µg/m³)</label>
                     <input
+                      id="sensor-pm10"
                       type="number"
                       placeholder="e.g. 70"
                       value={sensorValues.pm10}
@@ -1110,8 +1119,9 @@ function IndoorAirContent() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-foreground-muted block mb-1">CO2 (ppm)</label>
+                    <label htmlFor="sensor-co2" className="text-[10px] text-foreground-muted block mb-1">CO2 (ppm)</label>
                     <input
+                      id="sensor-co2"
                       type="number"
                       placeholder="e.g. 800"
                       value={sensorValues.co2}
@@ -1120,8 +1130,9 @@ function IndoorAirContent() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-foreground-muted block mb-1">Temp (°C)</label>
+                    <label htmlFor="sensor-temp" className="text-[10px] text-foreground-muted block mb-1">Temp (°C)</label>
                     <input
+                      id="sensor-temp"
                       type="number"
                       placeholder="e.g. 24"
                       value={sensorValues.temperature}
@@ -1130,8 +1141,9 @@ function IndoorAirContent() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-foreground-muted block mb-1">Humidity (%)</label>
+                    <label htmlFor="sensor-humidity" className="text-[10px] text-foreground-muted block mb-1">Humidity (%)</label>
                     <input
+                      id="sensor-humidity"
                       type="number"
                       placeholder="e.g. 50"
                       value={sensorValues.humidity}

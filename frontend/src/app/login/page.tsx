@@ -83,32 +83,46 @@ function LoginForm() {
 
         <Card className="p-6 bg-surface border-border-subtle shadow-md space-y-5">
           {error && (
-            <div className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-700 dark:text-red-300 font-mono">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
+            <div
+              role="alert"
+              aria-live="polite"
+              className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-700 dark:text-red-300 font-mono"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate={false}>
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-primary" />
+              <label
+                htmlFor="login-email"
+                className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5"
+              >
+                <Mail className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                 Email Address
               </label>
               <input
+                id="login-email"
+                name="email"
                 type="email"
+                autoComplete="email"
+                aria-required="true"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 required
-                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted"
+                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-foreground placeholder:text-foreground-muted"
               />
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-primary" />
+                <label
+                  htmlFor="login-password"
+                  className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                   Password
                 </label>
                 <Link
@@ -120,17 +134,21 @@ function LoginForm() {
               </div>
               <div className="relative">
                 <input
+                  id="login-password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  aria-required="true"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full px-3.5 py-2 pr-10 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted"
+                  className="w-full px-3.5 py-2 pr-10 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-foreground placeholder:text-foreground-muted"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground p-1 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -139,8 +157,13 @@ function LoginForm() {
             </div>
 
             <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none text-foreground-secondary">
+              <label
+                htmlFor="login-remember"
+                className="flex items-center gap-2 cursor-pointer select-none text-foreground-secondary"
+              >
                 <input
+                  id="login-remember"
+                  name="remember"
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}

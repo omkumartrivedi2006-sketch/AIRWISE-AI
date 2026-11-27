@@ -108,15 +108,23 @@ export default function RegisterPage() {
 
         <Card className="p-6 bg-surface border-border-subtle shadow-md space-y-5">
         {error && (
-          <div className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-700 dark:text-red-300 font-mono">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
+          <div
+            role="alert"
+            aria-live="polite"
+            className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2.5 text-xs text-red-700 dark:text-red-300 font-mono"
+          >
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex flex-col items-center text-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 font-mono">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <div
+            role="status"
+            aria-live="polite"
+            className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex flex-col items-center text-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 font-mono"
+          >
+            <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
             <span className="font-bold text-sm">Account Created Successfully!</span>
             <span>A verification token has been issued. Redirecting you to sign in...</span>
           </div>
@@ -125,57 +133,77 @@ export default function RegisterPage() {
         {!success && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-primary" />
+              <label
+                htmlFor="reg-fullname"
+                className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5"
+              >
+                <User className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                 Full Name
               </label>
               <input
+                id="reg-fullname"
+                name="fullname"
                 type="text"
+                autoComplete="name"
+                aria-required="true"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Dr. Elena Rostova"
                 required
                 disabled={isLoading}
-                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted disabled:opacity-50"
+                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-foreground placeholder:text-foreground-muted disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-primary" />
+              <label
+                htmlFor="reg-email"
+                className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5"
+              >
+                <Mail className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                 Email Address
               </label>
               <input
+                id="reg-email"
+                name="email"
                 type="email"
+                autoComplete="email"
+                aria-required="true"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="elena@example.com"
                 required
                 disabled={isLoading}
-                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted disabled:opacity-50"
+                className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-foreground placeholder:text-foreground-muted disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-primary" />
+              <label
+                htmlFor="reg-password"
+                className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5"
+              >
+                <Lock className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                 Password (Argon2id Encrypted)
               </label>
               <div className="relative">
                 <input
+                  id="reg-password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  aria-required="true"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 12 characters"
                   required
                   disabled={isLoading}
-                  className="w-full px-3.5 py-2 pr-10 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus:outline-none text-foreground placeholder:text-foreground-muted disabled:opacity-50"
+                  className="w-full px-3.5 py-2 pr-10 text-xs rounded-lg bg-surface border border-border-subtle focus:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-foreground placeholder:text-foreground-muted disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors p-1"
-                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -183,38 +211,49 @@ export default function RegisterPage() {
               </div>
 
               {/* Password Requirement Checklist */}
-              <div className="p-3 rounded-lg bg-background-secondary border border-border-subtle grid grid-cols-2 gap-1.5 text-[11px] font-mono mt-2">
+              <div
+                role="status"
+                aria-label="Password strength requirements"
+                className="p-3 rounded-lg bg-background-secondary border border-border-subtle grid grid-cols-2 gap-1.5 text-[11px] font-mono mt-2"
+              >
                 <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
-                  <Check className="w-3.5 h-3.5" /> 12+ Characters
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" /> 12+ Characters
                 </div>
                 <div className={`flex items-center gap-1.5 ${hasUpper ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
-                  <Check className="w-3.5 h-3.5" /> Uppercase (A-Z)
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" /> Uppercase (A-Z)
                 </div>
                 <div className={`flex items-center gap-1.5 ${hasLower ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
-                  <Check className="w-3.5 h-3.5" /> Lowercase (a-z)
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" /> Lowercase (a-z)
                 </div>
                 <div className={`flex items-center gap-1.5 ${hasNumber ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
-                  <Check className="w-3.5 h-3.5" /> Numeric (0-9)
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" /> Numeric (0-9)
                 </div>
                 <div className={`flex items-center gap-1.5 col-span-2 ${hasSpecial ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-foreground-muted"}`}>
-                  <Check className="w-3.5 h-3.5" /> Symbol (!@#$%^&*)
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" /> Symbol (!@#$%^&*)
                 </div>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-primary" />
+              <label
+                htmlFor="reg-confirm-password"
+                className="text-xs font-mono text-foreground-secondary flex items-center gap-1.5"
+              >
+                <Lock className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                 Confirm Password
               </label>
               <input
+                id="reg-confirm-password"
+                name="confirmPassword"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                aria-required="true"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter your password"
                 required
                 disabled={isLoading}
-                className={`w-full px-3.5 py-2 text-xs rounded-lg bg-surface border text-foreground placeholder:text-foreground-muted focus:outline-none disabled:opacity-50 ${confirmPassword && !passwordsMatch
+                className={`w-full px-3.5 py-2 text-xs rounded-lg bg-surface border text-foreground placeholder:text-foreground-muted focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 ${confirmPassword && !passwordsMatch
                   ? "border-red-500/50 focus:border-red-500"
                   : "border-border-subtle focus:border-primary"
                   }`}

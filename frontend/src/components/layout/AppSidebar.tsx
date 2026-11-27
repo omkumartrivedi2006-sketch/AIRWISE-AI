@@ -81,7 +81,8 @@ export const AppSidebar: React.FC = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                aria-current={isActive ? "page" : undefined}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   isActive
                     ? "bg-primary text-white dark:text-black font-semibold shadow-sm"
                     : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
@@ -111,7 +112,8 @@ export const AppSidebar: React.FC = () => {
         {/* User Badge */}
         <Link
           href="/profile"
-          className="flex items-center gap-2.5 p-2 rounded-lg bg-surface border border-border-subtle hover:border-border-strong transition-colors group"
+          aria-label={`View account profile for ${user?.full_name || user?.email || "User"}`}
+          className="flex items-center gap-2.5 p-2 rounded-lg bg-surface border border-border-subtle hover:border-border-strong transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white dark:text-black font-bold text-xs flex-shrink-0">
             {user?.full_name ? user.full_name[0].toUpperCase() : "U"}
@@ -132,8 +134,9 @@ export const AppSidebar: React.FC = () => {
 
           <button
             onClick={() => logout()}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-foreground-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-foreground-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
             title="Sign out of AIRWISE AI"
+            aria-label="Sign out of AIRWISE AI"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>

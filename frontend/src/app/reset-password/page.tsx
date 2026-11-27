@@ -85,21 +85,21 @@ function ResetPasswordForm() {
 
       <Card className="p-6 bg-[#141B23] border-white/[0.09] space-y-5">
         {!token && (
-          <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
+          <div role="alert" aria-live="polite" className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>Missing password reset token. Please request a new recovery link.</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
+          <div role="alert" aria-live="polite" className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-400 font-mono">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success ? (
-          <div className="p-4 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 space-y-3 text-center">
+          <div role="status" className="p-4 rounded-lg bg-[#38E0B4]/10 border border-[#38E0B4]/30 space-y-3 text-center">
             <CheckCircle2 className="w-8 h-8 text-[#38E0B4] mx-auto" />
             <h3 className="text-sm font-bold text-[#F5F7FA]">Password Reset Completed</h3>
             <p className="text-xs text-[#A5B0BC]">
@@ -116,13 +116,16 @@ function ResetPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
+              <label htmlFor="reset-password" className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-[#38E0B4]" />
                 New Password (Argon2id Encrypted)
               </label>
               <div className="relative">
                 <input
+                  id="reset-password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  aria-required="true"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 12 characters"
@@ -133,15 +136,15 @@ function ResetPasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7A8D] hover:text-[#F5F7FA] transition-colors"
-                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7A8D] hover:text-[#F5F7FA] transition-colors focus:outline-none focus-visible:text-[#28C7F5]"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
               {/* Requirements Checklist */}
-              <div className="p-3 rounded-lg bg-[#10151B] border border-white/[0.06] grid grid-cols-2 gap-1.5 text-[11px] font-mono mt-2">
+              <div role="status" aria-label="Password strength requirements" className="p-3 rounded-lg bg-[#10151B] border border-white/[0.06] grid grid-cols-2 gap-1.5 text-[11px] font-mono mt-2">
                 <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-[#38E0B4]" : "text-[#6B7A8D]"}`}>
                   <Check className="w-3.5 h-3.5" /> 12+ Characters
                 </div>
@@ -161,12 +164,15 @@ function ResetPasswordForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
+              <label htmlFor="reset-confirm-password" className="text-xs font-mono text-[#A5B0BC] flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-[#38E0B4]" />
                 Confirm New Password
               </label>
               <input
+                id="reset-confirm-password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                aria-required="true"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter your new password"
