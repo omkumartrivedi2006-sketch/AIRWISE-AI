@@ -511,12 +511,12 @@ function IndoorAirContent() {
         ...formData,
         sensor_readings: hasSensorInput
           ? {
-              pm25: sensorValues.pm25 ? parseFloat(sensorValues.pm25) : undefined,
-              pm10: sensorValues.pm10 ? parseFloat(sensorValues.pm10) : undefined,
-              co2: sensorValues.co2 ? parseFloat(sensorValues.co2) : undefined,
-              temperature: sensorValues.temperature ? parseFloat(sensorValues.temperature) : undefined,
-              humidity: sensorValues.humidity ? parseFloat(sensorValues.humidity) : undefined,
-            }
+            pm25: sensorValues.pm25 ? parseFloat(sensorValues.pm25) : undefined,
+            pm10: sensorValues.pm10 ? parseFloat(sensorValues.pm10) : undefined,
+            co2: sensorValues.co2 ? parseFloat(sensorValues.co2) : undefined,
+            temperature: sensorValues.temperature ? parseFloat(sensorValues.temperature) : undefined,
+            humidity: sensorValues.humidity ? parseFloat(sensorValues.humidity) : undefined,
+          }
           : null,
       };
 
@@ -677,10 +677,10 @@ function IndoorAirContent() {
                   latestAssessment.risk_score >= 75
                     ? "hazardous"
                     : latestAssessment.risk_score >= 55
-                    ? "poor"
-                    : latestAssessment.risk_score >= 30
-                    ? "moderate"
-                    : "good"
+                      ? "poor"
+                      : latestAssessment.risk_score >= 30
+                        ? "moderate"
+                        : "good"
                 }
               >
                 {latestAssessment.risk_level} ({latestAssessment.risk_score}/100)
@@ -1468,10 +1468,10 @@ function IndoorAirContent() {
                           item.risk_score >= 75
                             ? "hazardous"
                             : item.risk_score >= 55
-                            ? "poor"
-                            : item.risk_score >= 30
-                            ? "moderate"
-                            : "good"
+                              ? "poor"
+                              : item.risk_score >= 30
+                                ? "moderate"
+                                : "good"
                         }
                       >
                         {item.risk_level}

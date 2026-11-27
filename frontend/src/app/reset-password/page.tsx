@@ -178,11 +178,10 @@ function ResetPasswordForm() {
                 placeholder="Re-enter your new password"
                 required
                 disabled={isLoading || !token}
-                className={`w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none disabled:opacity-50 ${
-                  confirmPassword && !passwordsMatch
-                    ? "border-rose-500/50 focus:border-rose-500"
-                    : "border-white/[0.09] focus:border-[#28C7F5]/50"
-                }`}
+                className={`w-full px-3.5 py-2.5 rounded-lg bg-[#10151B] border text-sm text-[#F5F7FA] placeholder-[#6B7A8D] focus:outline-none disabled:opacity-50 ${confirmPassword && !passwordsMatch
+                  ? "border-rose-500/50 focus:border-rose-500"
+                  : "border-white/[0.09] focus:border-[#28C7F5]/50"
+                  }`}
               />
               {confirmPassword && !passwordsMatch && (
                 <p className="text-[11px] font-mono text-rose-400">Passwords do not match</p>

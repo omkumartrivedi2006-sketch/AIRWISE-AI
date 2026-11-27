@@ -431,11 +431,10 @@ function CommunityContent() {
             role="tab"
             aria-selected={activeTab === "map"}
             onClick={() => setActiveTab("map")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "map"
-                ? "bg-primary text-white dark:text-black shadow-sm"
-                : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${activeTab === "map"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
+              }`}
           >
             Interactive Hotspot Map
           </button>
@@ -443,11 +442,10 @@ function CommunityContent() {
             role="tab"
             aria-selected={activeTab === "feed"}
             onClick={() => setActiveTab("feed")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "feed"
-                ? "bg-primary text-white dark:text-black shadow-sm"
-                : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${activeTab === "feed"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
+              }`}
           >
             Recent Incident Feed
           </button>
@@ -455,11 +453,10 @@ function CommunityContent() {
             role="tab"
             aria-selected={activeTab === "my_reports"}
             onClick={() => setActiveTab("my_reports")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "my_reports"
-                ? "bg-primary text-white dark:text-black shadow-sm"
-                : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${activeTab === "my_reports"
+              ? "bg-primary text-white dark:text-black shadow-sm"
+              : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
+              }`}
           >
             My Reports ({myReports.length})
           </button>
@@ -468,11 +465,10 @@ function CommunityContent() {
               role="tab"
               aria-selected={activeTab === "admin"}
               onClick={() => setActiveTab("admin")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                activeTab === "admin"
-                  ? "bg-red-500 text-white shadow-sm"
-                  : "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-              }`}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${activeTab === "admin"
+                ? "bg-red-500 text-white shadow-sm"
+                : "text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                }`}
             >
               Admin Moderation
             </button>
@@ -524,10 +520,10 @@ function CommunityContent() {
                         selectedReport.status === "VERIFIED"
                           ? "good"
                           : selectedReport.status === "RESOLVED"
-                          ? "good"
-                          : selectedReport.status === "REJECTED"
-                          ? "hazardous"
-                          : "moderate"
+                            ? "good"
+                            : selectedReport.status === "REJECTED"
+                              ? "hazardous"
+                              : "moderate"
                       }
                     >
                       {selectedReport.status}
@@ -629,10 +625,10 @@ function CommunityContent() {
                       r.status === "VERIFIED"
                         ? "good"
                         : r.status === "RESOLVED"
-                        ? "good"
-                        : r.status === "REJECTED"
-                        ? "hazardous"
-                        : "moderate"
+                          ? "good"
+                          : r.status === "REJECTED"
+                            ? "hazardous"
+                            : "moderate"
                     }
                   >
                     {r.status}
@@ -712,10 +708,10 @@ function CommunityContent() {
                             item.status === "VERIFIED"
                               ? "good"
                               : item.status === "RESOLVED"
-                              ? "good"
-                              : item.status === "REJECTED"
-                              ? "hazardous"
-                              : "moderate"
+                                ? "good"
+                                : item.status === "REJECTED"
+                                  ? "hazardous"
+                                  : "moderate"
                           }
                         >
                           {item.status}

@@ -82,11 +82,10 @@ export const AppSidebar: React.FC = () => {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  isActive
-                    ? "bg-primary text-white dark:text-black font-semibold shadow-sm"
-                    : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
-                }`}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isActive
+                  ? "bg-primary text-white dark:text-black font-semibold shadow-sm"
+                  : "text-foreground-secondary hover:text-foreground hover:bg-surface-hover"
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon className={`w-4 h-4 ${isActive ? "text-white dark:text-black" : "text-primary"}`} />
@@ -94,9 +93,8 @@ export const AppSidebar: React.FC = () => {
                 </div>
                 {item.badge && (
                   <span
-                    className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
-                      isActive ? "bg-black/20 text-white dark:text-black" : "bg-primary/10 text-primary"
-                    }`}
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${isActive ? "bg-black/20 text-white dark:text-black" : "bg-primary/10 text-primary"
+                      }`}
                   >
                     {item.badge}
                   </span>
